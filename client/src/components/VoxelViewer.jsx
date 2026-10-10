@@ -7,6 +7,7 @@ import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cleanId, colorFor, isTransparent } from '../lib/blockColors.js';
+import { TRANSLATIONS } from '../lib/i18n.js';
 import {
   Box,
   Layers,
@@ -169,7 +170,8 @@ function CameraRig({ controlsRef, target, span }) {
   );
 }
 
-export default function VoxelViewer({ structure, isFullscreen, onToggleFullscreen }) {
+export default function VoxelViewer({ structure, isFullscreen, onToggleFullscreen, lang = 'tr' }) {
+  const t = (key) => TRANSLATIONS[lang]?.[key] || TRANSLATIONS.tr[key] || key;
   const hasStructure = Boolean(structure && structure.blocks && structure.blocks.length > 0);
   const dims = structure?.dimensions || { width: 64, height: 32, depth: 64 };
   const { width, height, depth } = dims;
@@ -428,7 +430,7 @@ export default function VoxelViewer({ structure, isFullscreen, onToggleFullscree
           <button
             type="button"
             onClick={() => setShowSlicer(!showSlicer)}
-            title="Dikey Katman Kesitini Aç/Kapat"
+            title={t('vp_slicer')}
             className={`cursor-pointer flex h-7 items-center gap-1.5 px-2 rounded-lg text-xs font-mono transition-colors ${
               showSlicer
                 ? 'bg-amber-cad/20 text-amber-cad border border-amber-cad/40'
@@ -436,7 +438,7 @@ export default function VoxelViewer({ structure, isFullscreen, onToggleFullscree
             }`}
           >
             <Sliders className="h-3.5 w-3.5" />
-            <span className="text-[11px]">Kesit</span>
+            <span className="text-[11px]">{lang === 'tr' ? 'Kesit' : 'Slicer'}</span>
           </button>
 
           <span className="mx-1 h-3.5 w-px bg-white/10" />
@@ -445,7 +447,7 @@ export default function VoxelViewer({ structure, isFullscreen, onToggleFullscree
           <button
             type="button"
             onClick={() => setBloomEnabled(!bloomEnabled)}
-            title="Bloom Işıma Efektini Aç/Kapat"
+            title={t('vp_bloom')}
             className={`cursor-pointer flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
               bloomEnabled ? 'text-amber-cad bg-surface-hover' : 'text-ink-dim hover:text-ink'
             }`}
@@ -458,7 +460,7 @@ export default function VoxelViewer({ structure, isFullscreen, onToggleFullscree
             <button
               type="button"
               onClick={() => setShowGrid(!showGrid)}
-              title="Chunk & Blok Izgarasını Aç/Kapat"
+              title={t('vp_grid')}
               className={`cursor-pointer flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
                 showGrid ? 'text-cyan-cad bg-surface-hover' : 'text-ink-dim hover:text-ink'
               }`}
@@ -468,7 +470,7 @@ export default function VoxelViewer({ structure, isFullscreen, onToggleFullscree
             <button
               type="button"
               onClick={() => setWireframe(!wireframe)}
-              title="Tel Kafes (Wireframe) CAD Modu"
+              title={t('vp_wireframe')}
               className={`cursor-pointer flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
                 wireframe ? 'text-amber-cad bg-surface-hover' : 'text-ink-dim hover:text-ink'
               }`}
@@ -484,7 +486,7 @@ export default function VoxelViewer({ structure, isFullscreen, onToggleFullscree
             <button
               type="button"
               onClick={() => setTheme('studio')}
-              title="Stüdyo Nötr CAD Aydınlatması"
+              title={t('vp_theme_cad')}
               className={`cursor-pointer flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
                 theme === 'studio' ? 'text-amber-cad bg-surface-hover' : 'text-ink-dim hover:text-ink'
               }`}
@@ -494,7 +496,7 @@ export default function VoxelViewer({ structure, isFullscreen, onToggleFullscree
             <button
               type="button"
               onClick={() => setTheme('nether')}
-              title="Nether Forge (Lav ve Magma Parıltısı)"
+              title={t('vp_theme_nether')}
               className={`cursor-pointer flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
                 theme === 'nether' ? 'text-red-cad bg-surface-hover' : 'text-ink-dim hover:text-ink'
               }`}
@@ -504,7 +506,7 @@ export default function VoxelViewer({ structure, isFullscreen, onToggleFullscree
             <button
               type="button"
               onClick={() => setTheme('dusk')}
-              title="Alacakaranlık / Sinematik Işık"
+              title={t('vp_theme_dusk')}
               className={`cursor-pointer flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
                 theme === 'dusk' ? 'text-pink-400 bg-surface-hover' : 'text-ink-dim hover:text-ink'
               }`}
@@ -519,7 +521,7 @@ export default function VoxelViewer({ structure, isFullscreen, onToggleFullscree
           <button
             type="button"
             onClick={onToggleFullscreen}
-            title={isFullscreen ? 'Tam Ekrandan Çık' : 'Tam Ekran Görünüm'}
+            title={isFullscreen ? t('vp_fullscreen_exit') : t('vp_fullscreen_enter')}
             className="cursor-pointer flex h-7 w-7 items-center justify-center rounded-lg text-ink-muted hover:bg-surface-hover hover:text-ink transition-colors"
           >
             {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
@@ -540,7 +542,7 @@ export default function VoxelViewer({ structure, isFullscreen, onToggleFullscree
             <div className="flex items-center justify-between font-mono text-xs">
               <span className="font-semibold text-ink flex items-center gap-1.5">
                 <Sliders className="h-3.5 w-3.5 text-amber-cad" />
-                Y-Ekseni Katman Kesit Analizi
+                {t('slicer_title')}
               </span>
               <span className="text-amber-cad font-semibold">
                 Y = {maxLayerY} / {height - 1}
@@ -555,15 +557,15 @@ export default function VoxelViewer({ structure, isFullscreen, onToggleFullscree
               className="h-1.5 w-full cursor-pointer accent-amber-cad bg-surface rounded appearance-none"
             />
             <div className="flex items-center justify-between font-mono text-[10px] text-ink-dim">
-              <span>Taban (Y: 0)</span>
+              <span>{t('slicer_base')}</span>
               <button
                 type="button"
                 onClick={() => setMaxLayerY(height - 1)}
                 className="cursor-pointer text-amber-cad hover:underline font-semibold"
               >
-                Sıfırla (Tüm Katmanlar)
+                {t('slicer_reset')}
               </button>
-              <span>Zirve (Y: {height - 1})</span>
+              <span>{t('slicer_peak')} (Y: {height - 1})</span>
             </div>
           </motion.div>
         )}
@@ -589,13 +591,13 @@ export default function VoxelViewer({ structure, isFullscreen, onToggleFullscree
                 [X: {hoveredVoxel.x}, Y: {hoveredVoxel.y}, Z: {hoveredVoxel.z}]
               </span>
               <span className="text-ink-dim">|</span>
-              <span className="text-amber-cad">Katman: Y={hoveredVoxel.y}</span>
+              <span className="text-amber-cad">{t('status_layer')}: Y={hoveredVoxel.y}</span>
             </div>
           ) : (
             <div className="flex items-center gap-1.5 text-ink-dim">
               <Crosshair className="h-3 w-3 text-amber-cad" />
               <span>
-                {hasStructure ? 'Voksel üzerine gelerek malzeme ve koordinatı inceleyin' : 'CAD Sahnesi Hazır'}
+                {hasStructure ? t('status_inspect_hint') : t('status_ready')}
               </span>
             </div>
           )}
@@ -603,11 +605,11 @@ export default function VoxelViewer({ structure, isFullscreen, onToggleFullscree
 
         {/* Sağ: Navigasyon Yardımcısı */}
         <div className="pointer-events-auto hidden md:flex items-center gap-3 rounded-xl border border-line bg-panel/90 px-3.5 py-2 backdrop-blur-md shadow-2xl text-ink-dim">
-          <span>Sol Tık: Yörünge</span>
+          <span>{t('nav_left')}</span>
           <span className="text-white/10">•</span>
-          <span>Sağ Tık: Kaydır</span>
+          <span>{t('nav_right')}</span>
           <span className="text-white/10">•</span>
-          <span>Tekerlek: Yakınlaş</span>
+          <span>{t('nav_wheel')}</span>
         </div>
       </div>
     </div>

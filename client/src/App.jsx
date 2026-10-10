@@ -1,5 +1,5 @@
 // BlockArchitect CAD Studio - Elite 3D Voxel Engine
-// Modüler & Rafine Tripartite Mimari: Gliding Pill Sekmeler, CAD Parametre Kontrolleri, Kategori Filtreli Palet ve Sonner Bildirimleri.
+// Modüler & Rafine Tripartite Mimari: TR/EN Çift Dil Desteği, Survival BOM Hesaplayıcı, Gliding Pill Sekmeler ve Sonner Bildirimleri.
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster, toast } from 'sonner';
@@ -7,6 +7,12 @@ import confetti from 'canvas-confetti';
 import VoxelViewer from './components/VoxelViewer.jsx';
 import { generateStructure, downloadSchem } from './lib/api.js';
 import { cleanId, colorFor } from './lib/blockColors.js';
+import {
+  LANGUAGES,
+  TRANSLATIONS,
+  BLUEPRINTS_I18N,
+  QUICK_SNIPPETS_I18N,
+} from './lib/i18n.js';
 import {
   Box,
   Terminal,
@@ -24,81 +30,46 @@ import {
   ChevronDown,
   ShieldAlert,
   Play,
-  RotateCcw,
   FolderDown,
   Activity,
   Cpu,
   Wand2,
-  Sliders,
-  Layers,
   SlidersHorizontal,
-  ChevronRight,
-  Eye,
-  HelpCircle,
+  Globe,
+  FileCode,
+  PackageCheck,
 } from 'lucide-react';
 
-const BLUEPRINTS = [
-  {
-    id: 'nova_hub',
-    category: 'pvp',
-    title: 'Hardcore PvP Hub & 3D "NOVA" Logosu',
-    badge: 'Spawn Lobi',
-    tags: ['180×180', '3D Logo', 'İkiz Ejderha', 'Volkanik Dağ'],
-    desc: '180×180 tabanlı volkanik kale, gökyüzünde 3B bloklarla yazılı devasa "NOVA" logosu, iki ejderha heykeli ve engelsiz PvP meydanı.',
-    prompt:
-      'Hardcore PvP Network Ana Lobisi (Spawn Citadel, 180x180 taban, 80 yükseklik). Karanlık, agresif ve heybetli volkanik atmosfer; lobiyi ezen dev ejderhalar, sarp obsidyen dağlar, fırtına bulutları ve gökyüzüne kazınmış 3B devasa "NOVA" logosu.\n\n1. GÖKYÜZÜNDEKİ ANITSAL 3D "NOVA" LOGOSU:\n- text_3d operatörü: text: "NOVA", scale:3, depth:4, arch:4 kavisli yay. İçi kan kırmızısı ve alev tonları (%70 red_concrete, %30 orange_concrete). Dış çerçevesi kalın siyah cilalı blackstone derin zırh konturu.\n\n2. LOGOYU KUŞATAN İKİ DEVASA KÜKREYEN EJDERHA HEYKELİ:\n- "NOVA" logosunun sağında ve solunda logoyu tutan iki adet 70 blokluk devasa ejderha (mirror ile simetrik): blackstone ve deepslate pullar, açık çene, bone_block sivri dişler, shroomlight parlayan gözler, 75 blok kanat açıklığı ve parıltılı kırmızı/siyah zar kanatlar (membrane).\n\n3. KESİNTİSİZ, GENİŞ VE DÜZ AYAK PVP DOĞMA MEYDANI:\n- Oyuncuların takılmadan hızla koşabileceği 55 blok çapında dairesel pürüzsüz koyu meydan (%60 polished_blackstone, %30 deepslate_tiles, %10 magma_block çatlak damarları). Ufak eşya/saksı engeli yok, yalnızca 4 yönde yüksek NPC kürsüleri.\n\n4. VOLKANİK DAĞLAR VE FIRTINA BULUTLARI:\n- Sarp keskin volkanik zirveler, dumanlı koyu fırtına bulutları ve göğe asılı devasa demir zincirler.',
-  },
-  {
-    id: 'blue_dragon',
-    category: 'organic',
-    title: 'Devasa Mavi Ejderha & Alev Konisi',
-    badge: 'Heykel',
-    tags: ['70 Blok', 'Alev Konisi', 'Prizmarin', 'Kemik Dişler'],
-    desc: '70 blok uzunluk, 60 kanat açıklığı, S-biçimli boyun, açık çene kemik dişler, prizmarin boynuzlar ve lav püskürten alev konisi.',
-    prompt:
-      'Devasa, aşırı detaylı mavi ejderha heykeli (~70 uzun, 60 kanat açıklığı, 40 yüksek). Blackstone/deepslate kayalık platformda, kanatlar açık, ağzından ateş püskürüyor. Sol-sağ simetrik (mirror). Gövde: kademeli daralan ellipsoid ve curve parçaları, blue_concrete ve blue_terracotta, sırtta light_blue_concrete pul deseni, karın white_concrete plakalar. S biçimli boyun, büyük baş: uzun burun, açık çene, bone_block dişler, shroomlight gözler, dark_prismarine boynuzlar. Sırtta bone_block diken sırası. Uzun kıvrımlı kuyruk, ucunda diken. Dört güçlü ayak, bone_block pençeler. Kanatlar: kalın dark_prismarine kemik iskeleti, arası light_blue_stained_glass zar. Ateş: ağızdan 25 blok ileri genişleyen koni, orange_concrete, red_concrete, yellow_concrete, magma_block karışık, yerde lav ve yanık zemin.',
-  },
-  {
-    id: 'gothic_cathedral',
-    category: 'monumental',
-    title: 'Görkemli Gotik Katedral & Payandalar',
-    badge: 'Mimari',
-    tags: ['50×80', 'Uçan Payanda', 'Gül Pencere', 'İkiz Çan Kulesi'],
-    desc: 'Uçan payandalar (flying buttresses), ikiz sivri çan kuleleri, dairesel vitray gül pencere ve tonozlu kemerler.',
-    prompt:
-      'Görkemli Gotik Katedral (50x80 taban, 55 yükseklik). Kemerli devasa nef, uçan payandalar (flying buttresses), iki adet yüksek sivri çan kuleleri, vitray camlı dairesel gül pencere (rose window), cilalı andezit ve taş tuğla duvarlar, iç mekan kemerli tavan ve asılı fenerler.',
-  },
-  {
-    id: 'japanese_pagoda',
-    category: 'monumental',
-    title: 'Üç Katlı Geleneksel Japon Pagodası',
-    badge: 'Doğu Mimarisi',
-    tags: ['3 Kat', 'Kavisli Saçak', 'Kiraz Çiçeği', 'Taş Kaide'],
-    desc: 'Kavisli ahşap çatı saçakları, kırmızı beton sütunlar, taş kaide ve kiraz çiçeği (cherry) bahçesi.',
-    prompt:
-      'Geleneksel üç katlı Japon Pagodası (25x25 taban, 38 yükseklik). Kavisli ahşap çatı saçakları, kırmızı beton sütunlar, taş kaide, kaide etrafında çitler, kiraz ağaçları (cherry) ve fenerler.',
-  },
-];
-
-const QUICK_SNIPPETS = [
-  { label: '3D NOVA Logosu', icon: Type, snippet: ' Gökyüzünde 3B bloklarla devasa kabartmalı "NOVA" logosu (text_3d).' },
-  { label: 'İkiz Ejderha', icon: Flame, snippet: ' Logoyu iki yandan kavrayan devasa kükreyen ejderha heykelleri (mirror).' },
-  { label: 'Volumetrik Bulut', icon: Cloud, snippet: ' Dağ zirvelerini ve gökyüzünü saran katmanlı beyaz duman bulut kütleleri.' },
-  { label: 'Volkanik Dağ & Lav', icon: Mountain, snippet: ' Çevrede sarp siyah taş dağlar, lav şelaleleri ve magma çatlakları.' },
-  { label: 'Düz PvP Meydanı', icon: Landmark, snippet: ' Ortada engelsiz, geniş ve düz dairesel cilalı taş PvP doğma meydanı.' },
-];
-
 const MODEL_OPTIONS = [
-  { id: 'deepseek', label: 'DeepSeek-V3', badge: 'Önerilen', desc: 'deepseek-chat • Yüksek Mantık & Hız (sk-4098...)', icon: Cpu },
-  { id: 'gemini', label: 'Gemini 3.8 Flash', badge: 'Google AI', desc: 'gemini-3.8-flash • Hızlı Geometri', icon: Sparkles },
-  { id: 'auto', label: 'Otomatik Yönlendirici', badge: 'Failover', desc: 'DeepSeek öncelikli, kotada otomatik geçiş', icon: Wand2 },
+  { id: 'deepseek', label: 'DeepSeek-V3', badgeKey: 'model_recommended', descKey: 'model_deepseek_desc', icon: Cpu },
+  { id: 'gemini', label: 'Gemini 3.8 Flash', badgeKey: 'model_google', descKey: 'model_gemini_desc', icon: Sparkles },
+  { id: 'auto', label: 'Auto Router', badgeKey: 'model_failover', descKey: 'model_auto_desc', icon: Wand2 },
 ];
+
+const SNIPPET_ICONS = [Type, Flame, Cloud, Mountain, Landmark];
 
 export default function App() {
+  // Dil Durumu (Persisted in localStorage)
+  const [lang, setLang] = useState(() => {
+    try {
+      return localStorage.getItem('blockarchitect_lang') || 'tr';
+    } catch {
+      return 'tr';
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('blockarchitect_lang', lang);
+    } catch {}
+  }, [lang]);
+
+  const t = (key) => TRANSLATIONS[lang]?.[key] || TRANSLATIONS.tr[key] || key;
+
   const [provider, setProvider] = useState('deepseek');
   const [modelDropdownOpen, setModelDropdownOpen] = useState(false);
   const [leftTab, setLeftTab] = useState('prompt'); // 'prompt' | 'blueprints'
-  const [rightTab, setRightTab] = useState('palette'); // 'palette' | 'deployment'
+  const [rightTab, setRightTab] = useState('palette'); // 'palette' | 'survival' | 'deployment'
 
   const [prompt, setPrompt] = useState('');
   const [maxSpan, setMaxSpan] = useState(180);
@@ -110,6 +81,7 @@ export default function App() {
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState('');
   const [copiedCmd, setCopiedCmd] = useState(false);
+  const [copiedDiscord, setCopiedDiscord] = useState(false);
 
   const [paletteCategory, setPaletteCategory] = useState('all'); // 'all' | 'stone' | 'light' | 'organic'
   const [paletteSearch, setPaletteSearch] = useState('');
@@ -120,6 +92,10 @@ export default function App() {
   const [telemetryStep, setTelemetryStep] = useState(0);
 
   const dropdownRef = useRef(null);
+
+  // Aktif dilde hazır şablonlar ve hızlı kod parçacıkları
+  const activeBlueprints = BLUEPRINTS_I18N[lang] || BLUEPRINTS_I18N.tr;
+  const activeSnippets = QUICK_SNIPPETS_I18N[lang] || QUICK_SNIPPETS_I18N.tr;
 
   // Model menüsünü dışarı tıklandığında kapat
   useEffect(() => {
@@ -164,18 +140,17 @@ export default function App() {
     setLoading(true);
     setError('');
     try {
-      // Parametreleri prompt sonuna otomatik ekler
       let fullPrompt = prompt.trim();
-      if (maxSpan) fullPrompt += ` (Maksimum Hacim: ${maxSpan} blok)`;
-      if (symmetry === 'x') fullPrompt += ` (Sol-Sağ Ayna Simetrisi X-axis mirror)`;
-      if (symmetry === 'z') fullPrompt += ` (Ön-Arka Ayna Simetrisi Z-axis mirror)`;
-      if (dithering) fullPrompt += ` (WorldEdit % gradyan dithering aktif)`;
+      if (maxSpan) fullPrompt += ` (Span limit: ${maxSpan} blocks)`;
+      if (symmetry === 'x') fullPrompt += ` (Left-Right X-axis mirror symmetry)`;
+      if (symmetry === 'z') fullPrompt += ` (Front-Back Z-axis mirror symmetry)`;
+      if (dithering) fullPrompt += ` (WorldEdit % gradient dithering enabled)`;
 
       const res = await generateStructure(fullPrompt, provider);
       setStructure(res);
       setRightOpen(true);
-      toast.success('3B Mimari Başarıyla Derlendi!', {
-        description: `${res.structure_name} • ${res.blocks.length.toLocaleString('tr-TR')} Voksel oluşturuldu.`,
+      toast.success(t('toast_compile_success'), {
+        description: `${res.structure_name} • ${res.blocks.length.toLocaleString(lang === 'tr' ? 'tr-TR' : 'en-US')} ${t('metric_voxels')}`,
       });
       confetti({
         particleCount: 80,
@@ -185,7 +160,7 @@ export default function App() {
       });
     } catch (err) {
       setError(err.message);
-      toast.error('Mimari Üretilemedi', {
+      toast.error(t('toast_compile_error'), {
         description: err.message,
       });
     } finally {
@@ -199,12 +174,12 @@ export default function App() {
     setError('');
     try {
       await downloadSchem(structure);
-      toast.success('.schem Dosyası İndirildi', {
-        description: 'Sponge Schematic v2 formatında sunucuya aktarılmaya hazır.',
+      toast.success(t('toast_download_schem'), {
+        description: `${structure.structure_name}.schem (Sponge v2)`,
       });
     } catch (err) {
       setError(err.message);
-      toast.error('İndirme Hatası', { description: err.message });
+      toast.error('Download Error', { description: err.message });
     } finally {
       setDownloading(false);
     }
@@ -216,10 +191,83 @@ export default function App() {
     const cmd = `//schem load ${safeName}\n//paste -a`;
     navigator.clipboard.writeText(cmd);
     setCopiedCmd(true);
-    toast.info('WorldEdit Komutları Kopyalandı', {
-      description: `//schem load ${safeName} & //paste -a panoya aktarıldı.`,
+    toast.info(t('copied_cmd_toast'), {
+      description: `//schem load ${safeName} & //paste -a`,
     });
     setTimeout(() => setCopiedCmd(false), 2000);
+  }
+
+  // Survival Malzeme Hesaplaması (Shulker Box + Stack + Item Formülü)
+  const survivalData = useMemo(() => {
+    if (!structure || !structure.blocks) return null;
+    const counts = new Map();
+    for (const b of structure.blocks) {
+      const raw = structure.palette[b.state];
+      if (!raw) continue;
+      const name = cleanId(raw);
+      counts.set(name, (counts.get(name) || 0) + 1);
+    }
+    const list = [...counts.entries()].map(([name, count]) => {
+      const shulkers = Math.floor(count / (27 * 64));
+      const remAfterShulker = count % (27 * 64);
+      const stacks = Math.floor(remAfterShulker / 64);
+      const remBlocks = remAfterShulker % 64;
+      return { name, count, shulkers, stacks, remBlocks };
+    });
+    list.sort((a, b) => b.count - a.count);
+    const total = structure.blocks.length;
+    const totalShulkers = Math.floor(total / (27 * 64));
+    const totalStacks = Math.floor(total / 64);
+    return { list, total, totalShulkers, totalStacks };
+  }, [structure]);
+
+  function handleCopyDiscordBOM() {
+    if (!survivalData || !structure) return;
+    const lines = [
+      `📦 **BlockArchitect Survival ${t('survival_title')}**`,
+      `🏰 ${lang === 'tr' ? 'Yapı' : 'Structure'}: **${structure.structure_name}** | ${t('survival_total_blocks')}: **${survivalData.total.toLocaleString()}**`,
+      `🎒 ${lang === 'tr' ? 'Toplam İhtiyaç' : 'Total Required'}: **${survivalData.totalShulkers} ${t('survival_format_shulker')} + ${survivalData.totalStacks} ${t('survival_format_stack')}**`,
+      `─────────────────────────────────────`,
+    ];
+    for (const item of survivalData.list) {
+      const parts = [];
+      if (item.shulkers > 0) parts.push(`${item.shulkers} ${t('survival_format_shulker')}`);
+      if (item.stacks > 0) parts.push(`${item.stacks} ${t('survival_format_stack')}`);
+      if (item.remBlocks > 0 || parts.length === 0) parts.push(`${item.remBlocks} ${t('survival_format_block')}`);
+      lines.push(`• **${item.name}**: ${item.count.toLocaleString()}x (${parts.join(' + ')})`);
+    }
+    navigator.clipboard.writeText(lines.join('\n'));
+    setCopiedDiscord(true);
+    toast.success(t('survival_copied_toast'));
+    setTimeout(() => setCopiedDiscord(false), 2000);
+  }
+
+  function handleDownloadMcfunction() {
+    if (!structure || !structure.blocks) return;
+    const lines = [
+      `# ==========================================`,
+      `# BlockArchitect CAD Studio - Vanilla Export`,
+      `# Structure: ${structure.structure_name}`,
+      `# Total Blocks: ${structure.blocks.length}`,
+      `# Date: ${new Date().toISOString()}`,
+      `# ==========================================`,
+      ``,
+    ];
+    for (const b of structure.blocks) {
+      const raw = structure.palette[b.state];
+      if (!raw) continue;
+      const id = cleanId(raw);
+      lines.push(`setblock ~${b.x} ~${b.y} ~${b.z} ${id}`);
+    }
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const safeName = (structure.structure_name || 'structure').replace(/[^a-z0-9_-]+/gi, '_');
+    a.download = `${safeName}.mcfunction`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(t('survival_mcfunction_toast'));
   }
 
   const dims = structure?.dimensions;
@@ -254,10 +302,11 @@ export default function App() {
   }, [stats.topBlocks, paletteCategory, paletteSearch]);
 
   const TELEMETRY_MSGS = [
-    'Geometrik mimari ve sınırlayıcı kutu ayrıştırılıyor…',
-    '3B Catmull-Rom eğrileri, spline gövdeler ve text_3d glifleri hesaplanıyor…',
-    'FBM Simplex gürültüsü arazi ve WorldEdit gradyan dithering matrisi işleniyor…',
-    'Sponge Schematic v2 NBT blok bileşimi paketleniyor…',
+    t('telemetry_1'),
+    t('telemetry_2'),
+    t('telemetry_3'),
+    t('telemetry_4'),
+    t('telemetry_5'),
   ];
 
   const activeModel = MODEL_OPTIONS.find((m) => m.id === provider) || MODEL_OPTIONS[0];
@@ -276,7 +325,7 @@ export default function App() {
               <Box className="h-4 w-4 text-amber-cad" />
             </div>
             <span>BlockArchitect</span>
-            <span className="text-[10px] text-ink-dim tracking-normal">/ CAD WORKSPACE</span>
+            <span className="text-[10px] text-ink-dim tracking-normal">/ CAD STUDIO</span>
           </div>
 
           <span className="h-3 w-px bg-white/10" />
@@ -319,7 +368,7 @@ export default function App() {
                 className="absolute top-9 left-1/2 -translate-x-1/2 z-50 w-76 rounded-xl border border-line bg-panel/95 p-1.5 backdrop-blur-xl shadow-2xl space-y-1"
               >
                 <div className="px-2.5 py-1 text-[10px] uppercase tracking-wider text-ink-dim font-mono border-b border-white/5">
-                  Yapay Zeka Mimar Motoru
+                  {lang === 'tr' ? 'Yapay Zeka Mimar Motoru' : 'AI Architect Engine'}
                 </div>
                 {MODEL_OPTIONS.map((opt) => {
                   const Icon = opt.icon;
@@ -332,7 +381,7 @@ export default function App() {
                       onClick={() => {
                         setProvider(opt.id);
                         setModelDropdownOpen(false);
-                        toast.info(`${opt.label} aktif motor olarak seçildi.`);
+                        toast.info(`${opt.label} active.`);
                       }}
                       className={`cursor-pointer flex w-full items-start gap-2.5 rounded-lg p-2 text-left transition-colors ${
                         isSelected ? 'bg-surface border border-line text-ink' : 'text-ink-muted hover:bg-surface-hover hover:text-ink'
@@ -343,10 +392,10 @@ export default function App() {
                         <div className="flex items-center justify-between">
                           <span className="font-semibold text-xs">{opt.label}</span>
                           <span className="rounded bg-base px-1 text-[9px] text-ink-dim border border-line font-mono">
-                            {opt.badge}
+                            {t(opt.badgeKey)}
                           </span>
                         </div>
-                        <p className="text-[10px] text-ink-dim mt-0.5 truncate">{opt.desc}</p>
+                        <p className="text-[10px] text-ink-dim mt-0.5 truncate">{t(opt.descKey)}</p>
                       </div>
                     </motion.button>
                   );
@@ -356,8 +405,28 @@ export default function App() {
           </AnimatePresence>
         </div>
 
-        {/* Sağ: Hızlı İşlem Düğmeleri ve Panel Toggles */}
+        {/* Sağ: Dil Seçici, Hızlı İşlem Düğmeleri ve Panel Toggles */}
         <div className="flex items-center gap-2">
+          {/* TR / EN Dil Seçici */}
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.96 }}
+            type="button"
+            onClick={() => {
+              const nextLang = lang === 'tr' ? 'en' : 'tr';
+              setLang(nextLang);
+              toast.success(nextLang === 'tr' ? 'Türkçe arayüz aktif.' : 'English interface enabled.');
+            }}
+            title={lang === 'tr' ? 'Switch interface to English' : 'Arayüzü Türkçe yap'}
+            className="cursor-pointer flex h-7 items-center gap-1.5 rounded-lg border border-line bg-surface/90 px-2 text-[11px] font-mono text-ink hover:border-line-bright hover:bg-surface-hover transition-colors shadow-sm"
+          >
+            <Globe className="h-3 w-3 text-cyan-cad" />
+            <span>{LANGUAGES[lang].flag}</span>
+            <span className="font-semibold text-amber-cad uppercase">{lang}</span>
+          </motion.button>
+
+          <span className="h-3 w-px bg-white/10" />
+
           {structure && (
             <>
               <motion.button
@@ -365,13 +434,13 @@ export default function App() {
                 whileTap={{ scale: 0.97 }}
                 type="button"
                 onClick={handleCopyCommand}
-                title="WorldEdit yapıştırma komutunu kopyala (//schem load & //paste)"
+                title="WorldEdit (//schem load & //paste)"
                 className="cursor-pointer flex h-7 items-center gap-1.5 rounded-lg bg-surface px-2.5 text-[11px] text-ink border border-line hover:border-line-bright hover:bg-surface-hover transition-colors shadow-sm"
               >
                 {copiedCmd ? (
                   <>
                     <Check className="h-3 w-3 text-emerald-cad" />
-                    <span className="text-emerald-cad font-semibold">Kopyalandı</span>
+                    <span className="text-emerald-cad font-semibold">{t('copied_cmd_toast')}</span>
                   </>
                 ) : (
                   <>
@@ -387,11 +456,11 @@ export default function App() {
                 type="button"
                 onClick={handleDownload}
                 disabled={downloading}
-                title="WorldEdit .schem dosyasını indir"
+                title="WorldEdit .schem"
                 className="cursor-pointer flex h-7 items-center gap-1.5 rounded-lg bg-amber-cad/15 px-2.5 text-[11px] text-amber-cad border border-amber-cad/30 hover:bg-amber-cad/25 transition-colors disabled:opacity-40 shadow-sm"
               >
                 <Download className="h-3 w-3" />
-                <span>{downloading ? 'Paketleniyor…' : '.schem İndir'}</span>
+                <span>{downloading ? t('compiling') : t('download_schem')}</span>
               </motion.button>
             </>
           )}
@@ -403,13 +472,13 @@ export default function App() {
             whileTap={{ scale: 0.95 }}
             type="button"
             onClick={() => setLeftOpen(!leftOpen)}
-            title={leftOpen ? 'Sol Mimar Panelini Gizle' : 'Sol Mimar Panelini Göster'}
+            title={leftOpen ? 'Hide Left Panel' : 'Show Left Panel'}
             className={`cursor-pointer flex h-7 items-center gap-1.5 rounded-lg px-2.5 text-[11px] border transition-colors ${
               leftOpen ? 'bg-surface text-ink border-line' : 'text-ink-dim border-transparent hover:text-ink'
             }`}
           >
             <Terminal className="h-3.5 w-3.5" />
-            <span className="hidden xl:inline">Mimar</span>
+            <span className="hidden xl:inline">{lang === 'tr' ? 'Mimar' : 'Architect'}</span>
           </motion.button>
 
           {/* Sağ Panel (Denetçi) Toggle */}
@@ -417,20 +486,20 @@ export default function App() {
             whileTap={{ scale: 0.95 }}
             type="button"
             onClick={() => setRightOpen(!rightOpen)}
-            title={rightOpen ? 'Sağ Denetçi Panelini Gizle' : 'Sağ Denetçi Panelini Göster'}
+            title={rightOpen ? 'Hide Right Panel' : 'Show Right Panel'}
             className={`cursor-pointer flex h-7 items-center gap-1.5 rounded-lg px-2.5 text-[11px] border transition-colors ${
               rightOpen ? 'bg-surface text-ink border-line' : 'text-ink-dim border-transparent hover:text-ink'
             }`}
           >
             <Palette className="h-3.5 w-3.5" />
-            <span className="hidden xl:inline">Denetçi</span>
+            <span className="hidden xl:inline">{lang === 'tr' ? 'Denetçi' : 'Inspector'}</span>
           </motion.button>
         </div>
       </header>
 
       {/* TRIPARTITE ÇALIŞMA ALANI: Solda Mimar, Ortada 3B Viewport, Sağda Denetçi */}
       <div className="relative flex flex-1 overflow-hidden">
-        {/* SOL CAD MİMAR PANELİ (360px - Gliding Tabs ile Rafine Edilmiş Mimar & Şablonlar) */}
+        {/* SOL CAD MİMAR PANELİ (360px) */}
         <AnimatePresence initial={false}>
           {leftOpen && !isFullscreen && (
             <motion.aside
@@ -458,7 +527,7 @@ export default function App() {
                   )}
                   <span className="relative z-10 flex items-center justify-center gap-1.5">
                     <Terminal className="h-3.5 w-3.5 text-amber-cad" />
-                    Mimar Direktifi
+                    {t('tab_directive')}
                   </span>
                 </button>
 
@@ -478,7 +547,7 @@ export default function App() {
                   )}
                   <span className="relative z-10 flex items-center justify-center gap-1.5">
                     <Landmark className="h-3.5 w-3.5 text-amber-cad" />
-                    Şablonlar ({BLUEPRINTS.length})
+                    {t('tab_blueprints')} ({activeBlueprints.length})
                   </span>
                 </button>
               </div>
@@ -491,7 +560,7 @@ export default function App() {
                     <form onSubmit={handleGenerate} className="space-y-3">
                       <div className="flex items-center justify-between font-mono text-[11px]">
                         <span className="text-ink-muted flex items-center gap-1.5 font-semibold uppercase tracking-wider">
-                          MİMARİ DİREKTİF KONSOLU
+                          {t('cad_console_title')}
                         </span>
                         <span className="text-ink-dim">{prompt.length} / 4000</span>
                       </div>
@@ -502,17 +571,17 @@ export default function App() {
                           onChange={(e) => setPrompt(e.target.value)}
                           maxLength={4000}
                           rows={6}
-                          placeholder="// Hayal ettiğiniz mimariyi, ejderha heykellerini, 3B logoyu veya gotik katedrali tarif edin... (Ctrl + Enter ile Çalıştır)"
+                          placeholder={t('prompt_placeholder')}
                           className="w-full resize-none bg-transparent font-mono text-xs leading-relaxed text-ink outline-none placeholder:text-ink-dim"
                         />
                       </div>
 
                       {/* Hızlı Mimari Parçacıkları */}
                       <div className="space-y-1.5">
-                        <span className="font-mono text-[10px] text-ink-dim uppercase">Hızlı Mimari Modüller:</span>
+                        <span className="font-mono text-[10px] text-ink-dim uppercase">{t('quick_snippets')}:</span>
                         <div className="flex flex-wrap gap-1">
-                          {QUICK_SNIPPETS.map((s) => {
-                            const Icon = s.icon;
+                          {activeSnippets.map((s, idx) => {
+                            const Icon = SNIPPET_ICONS[idx % SNIPPET_ICONS.length];
                             return (
                               <motion.button
                                 whileHover={{ scale: 1.03 }}
@@ -530,15 +599,15 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* CAD Parametre Kılavuzları (Segmented Controls) */}
+                      {/* CAD Parametre Kılavuzları */}
                       <div className="space-y-2 rounded-xl border border-line bg-surface/50 p-3 font-mono text-xs">
                         <span className="text-[10px] text-ink-dim uppercase flex items-center gap-1">
                           <SlidersHorizontal className="h-3 w-3 text-amber-cad" />
-                          Hacim & Geometri Kısıtları:
+                          {t('cad_controls_title')}:
                         </span>
 
                         <div className="flex items-center justify-between text-[11px]">
-                          <span className="text-ink-muted">Maks. Blok Boyutu:</span>
+                          <span className="text-ink-muted">{t('max_volume_span')}:</span>
                           <div className="flex rounded-lg border border-line bg-surface p-0.5 gap-0.5">
                             {[64, 128, 180, 256].map((spanVal) => (
                               <button
@@ -556,12 +625,12 @@ export default function App() {
                         </div>
 
                         <div className="flex items-center justify-between text-[11px]">
-                          <span className="text-ink-muted">Ayna Simetrisi:</span>
+                          <span className="text-ink-muted">{t('mirror_symmetry')}:</span>
                           <div className="flex rounded-lg border border-line bg-surface p-0.5 gap-0.5">
                             {[
-                              { id: 'none', label: 'Yok' },
-                              { id: 'x', label: 'X (Sol-Sağ)' },
-                              { id: 'z', label: 'Z (Ön-Arka)' },
+                              { id: 'none', label: t('sym_none') },
+                              { id: 'x', label: t('sym_x') },
+                              { id: 'z', label: t('sym_z') },
                             ].map((sym) => (
                               <button
                                 key={sym.id}
@@ -578,7 +647,7 @@ export default function App() {
                         </div>
 
                         <div className="flex items-center justify-between text-[11px] pt-0.5">
-                          <span className="text-ink-muted">WorldEdit % Gradyan:</span>
+                          <span className="text-ink-muted">{t('gradient_dithering')}:</span>
                           <button
                             type="button"
                             onClick={() => setDithering(!dithering)}
@@ -588,12 +657,12 @@ export default function App() {
                                 : 'bg-surface text-ink-dim border-line'
                             }`}
                           >
-                            {dithering ? 'Aktif' : 'Düz Blok'}
+                            {dithering ? 'ON' : 'OFF'}
                           </button>
                         </div>
                       </div>
 
-                      {/* Çalıştır Butonu */}
+                      {/* Derle Butonu */}
                       <motion.button
                         whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.98 }}
@@ -602,14 +671,14 @@ export default function App() {
                         className="cursor-pointer group flex w-full items-center justify-center gap-2 rounded-xl bg-amber-cad px-4 py-2.5 font-mono text-xs font-bold text-base shadow-lg shadow-amber-cad/10 transition-all hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-35"
                       >
                         <Play className="h-3.5 w-3.5 fill-current" />
-                        <span>{loading ? 'İnşa Ediliyor…' : 'Mimariyi Çalıştır'}</span>
+                        <span>{loading ? t('compiling') : t('compile_btn')}</span>
                         <kbd className="hidden sm:inline rounded bg-base/20 px-1.5 py-0.2 font-mono text-[10px] text-base">
                           Ctrl + ↵
                         </kbd>
                       </motion.button>
                     </form>
 
-                    {/* Hata Raporu ve Bakiye Rehberi */}
+                    {/* Hata Raporu */}
                     {error && (
                       <motion.div
                         initial={{ opacity: 0, y: 4 }}
@@ -622,7 +691,7 @@ export default function App() {
                         </div>
                         {error.includes('Insufficient Balance') && (
                           <div className="mt-1 pt-1.5 border-t border-red-500/20 text-[10px] text-red-300 font-mono">
-                            💡 <strong>DeepSeek Bakiye Uyarısı:</strong> DeepSeek API hesabınızda bakiye kalmamış. 
+                            💡 <strong>DeepSeek Balance Alert:</strong> Top up at{' '}
                             <a
                               href="https://platform.deepseek.com/top_up"
                               target="_blank"
@@ -630,7 +699,7 @@ export default function App() {
                               className="underline text-amber-cad ml-1"
                             >
                               platform.deepseek.com/top_up
-                            </a> adresinden bakiye yükledikten hemen sonra çağrılar aktifleşir.
+                            </a>.
                           </div>
                         )}
                       </motion.div>
@@ -646,9 +715,9 @@ export default function App() {
                         <div className="flex items-center justify-between text-[11px] text-amber-cad">
                           <span className="flex items-center gap-1.5 font-semibold">
                             <Activity className="h-3 w-3 animate-spin" />
-                            Üretim Boru Hattı Aktif
+                            Pipeline Active
                           </span>
-                          <span>Adım {Math.min(telemetryStep + 1, 4)} / 4</span>
+                          <span>Step {Math.min(telemetryStep + 1, 5)} / 5</span>
                         </div>
                         <div className="space-y-1 text-[11px] text-ink-dim">
                           {TELEMETRY_MSGS.map((msg, idx) => (
@@ -674,12 +743,12 @@ export default function App() {
                   /* Şablon Galerisi Vitrini */
                   <div className="space-y-2.5 font-mono text-xs">
                     <div className="flex items-center justify-between text-ink-dim text-[11px]">
-                      <span>HAZIR MİMARİ MODELLER</span>
-                      <span>Tek tıkla yükleyin</span>
+                      <span>{t('blueprints_header')}</span>
+                      <span>{activeBlueprints.length} Presets</span>
                     </div>
 
                     <div className="space-y-2.5">
-                      {BLUEPRINTS.map((bp) => (
+                      {activeBlueprints.map((bp) => (
                         <motion.div
                           whileHover={{ y: -2 }}
                           key={bp.id}
@@ -693,9 +762,9 @@ export default function App() {
                           </div>
 
                           <div className="flex flex-wrap gap-1">
-                            {bp.tags.map((t) => (
-                              <span key={t} className="rounded bg-base/80 px-1.5 py-0.2 text-[9px] text-amber-cad border border-white/5">
-                                {t}
+                            {bp.tags.map((tg) => (
+                              <span key={tg} className="rounded bg-base/80 px-1.5 py-0.2 text-[9px] text-amber-cad border border-white/5">
+                                {tg}
                               </span>
                             ))}
                           </div>
@@ -707,12 +776,12 @@ export default function App() {
                             onClick={() => {
                               setPrompt(bp.prompt);
                               setLeftTab('prompt');
-                              toast.success(`"${bp.title}" konsola yüklendi!`);
+                              toast.success(`"${bp.title}" injected into console!`);
                             }}
                             className="cursor-pointer w-full flex items-center justify-center gap-1.5 rounded-lg bg-base py-1.5 text-[10px] text-ink border border-line hover:border-amber-cad/50 hover:text-amber-cad transition-colors font-semibold"
                           >
                             <Play className="h-3 w-3 fill-current" />
-                            <span>Bu Şablonu Konsola Yükle</span>
+                            <span>{t('blueprint_use_btn')}</span>
                           </button>
                         </motion.div>
                       ))}
@@ -724,27 +793,28 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        {/* ORTA: KESİNTİSİZ VE DAİMİ 3B VIEWPORT (Always-On Stage) */}
+        {/* ORTA: KESİNTİSİZ VE DAİMİ 3B VIEWPORT */}
         <main className="relative flex-1 h-full w-full bg-base overflow-hidden">
           <VoxelViewer
             structure={structure}
             isFullscreen={isFullscreen}
             onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+            lang={lang}
           />
         </main>
 
-        {/* SAĞ CAD DENETÇİ PANELİ (320px - Gliding Tabs ile Palet & WorldEdit) */}
+        {/* SAĞ CAD DENETÇİ PANELİ (320px - Palet, Survival BOM & WorldEdit) */}
         <AnimatePresence initial={false}>
           {rightOpen && !isFullscreen && (
             <motion.aside
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 320, opacity: 1 }}
+              animate={{ width: 330, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ type: 'spring', damping: 28, stiffness: 280 }}
               className="shrink-0 flex flex-col border-l border-line bg-panel z-20 overflow-hidden shadow-2xl"
             >
-              {/* Sağ Üst Gliding Tab Switcher */}
-              <div className="w-[320px] border-b border-line bg-surface/40 p-2 flex items-center gap-1 font-mono text-[11px]">
+              {/* Sağ Üst 3'lü Gliding Tab Switcher */}
+              <div className="w-[330px] border-b border-line bg-surface/40 p-1.5 flex items-center gap-1 font-mono text-[10px]">
                 <button
                   type="button"
                   onClick={() => setRightTab('palette')}
@@ -759,9 +829,29 @@ export default function App() {
                       transition={{ type: 'spring', damping: 25, stiffness: 350 }}
                     />
                   )}
-                  <span className="relative z-10 flex items-center justify-center gap-1.5">
-                    <Palette className="h-3.5 w-3.5 text-amber-cad" />
-                    Malzemeler ({stats.topBlocks.length})
+                  <span className="relative z-10 flex items-center justify-center gap-1">
+                    <Palette className="h-3 w-3 text-amber-cad" />
+                    {t('tab_palette')}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRightTab('survival')}
+                  className={`relative cursor-pointer flex-1 py-1.5 rounded-lg text-center font-semibold transition-colors ${
+                    rightTab === 'survival' ? 'text-ink' : 'text-ink-dim hover:text-ink-muted'
+                  }`}
+                >
+                  {rightTab === 'survival' && (
+                    <motion.div
+                      layoutId="rightTabIndicator"
+                      className="absolute inset-0 rounded-lg bg-surface border border-line shadow-sm"
+                      transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center justify-center gap-1">
+                    <PackageCheck className="h-3 w-3 text-emerald-cad" />
+                    {t('tab_survival')}
                   </span>
                 </button>
 
@@ -779,22 +869,22 @@ export default function App() {
                       transition={{ type: 'spring', damping: 25, stiffness: 350 }}
                     />
                   )}
-                  <span className="relative z-10 flex items-center justify-center gap-1.5">
-                    <FolderDown className="h-3.5 w-3.5 text-amber-cad" />
-                    WorldEdit
+                  <span className="relative z-10 flex items-center justify-center gap-1">
+                    <FolderDown className="h-3 w-3 text-amber-cad" />
+                    {t('tab_deployment')}
                   </span>
                 </button>
               </div>
 
               {/* Sağ Panel İçerik Alanı */}
-              <div className="w-[320px] flex-1 overflow-y-auto p-4 space-y-4 font-mono text-xs">
-                {rightTab === 'palette' ? (
+              <div className="w-[330px] flex-1 overflow-y-auto p-4 space-y-4 font-mono text-xs">
+                {rightTab === 'palette' && (
                   <div className="space-y-4">
                     {/* Hacim & Voksel İstatistiği */}
                     <div className="space-y-2">
                       <span className="text-ink-muted uppercase tracking-wider text-[11px] font-semibold flex items-center gap-1.5">
                         <Box className="h-3.5 w-3.5 text-amber-cad" />
-                        Hacim & Voksel Metrikleri
+                        {t('metric_volume')} & {t('metric_voxels')}
                       </span>
 
                       {structure ? (
@@ -804,25 +894,25 @@ export default function App() {
                               {structure.structure_name}
                             </span>
                             <span className="text-emerald-cad text-[10px] bg-emerald-cad/10 px-1.5 py-0.5 rounded border border-emerald-cad/20 font-semibold">
-                              Derlendi
+                              OK
                             </span>
                           </div>
 
                           <div className="grid grid-cols-3 gap-1.5 text-center text-[10px]">
                             <div className="rounded border border-line bg-base p-1.5">
-                              <div className="text-ink-dim">Boyut</div>
+                              <div className="text-ink-dim">{t('metric_volume')}</div>
                               <div className="text-ink font-semibold mt-0.5">
                                 {dims.width}×{dims.height}×{dims.depth}
                               </div>
                             </div>
                             <div className="rounded border border-line bg-base p-1.5">
-                              <div className="text-ink-dim">Voksel</div>
+                              <div className="text-ink-dim">{t('metric_voxels')}</div>
                               <div className="text-emerald-cad font-semibold mt-0.5">
-                                {stats.total.toLocaleString('tr-TR')}
+                                {stats.total.toLocaleString(lang === 'tr' ? 'tr-TR' : 'en-US')}
                               </div>
                             </div>
                             <div className="rounded border border-line bg-base p-1.5">
-                              <div className="text-ink-dim">Chunk</div>
+                              <div className="text-ink-dim">{t('metric_chunk')}</div>
                               <div className="text-cyan-cad font-semibold mt-0.5">
                                 {(dims.width / 16).toFixed(1)}×{(dims.depth / 16).toFixed(1)}
                               </div>
@@ -831,7 +921,7 @@ export default function App() {
                         </div>
                       ) : (
                         <div className="rounded-xl border border-line bg-surface/50 p-4 text-center text-ink-dim text-[11px]">
-                          Henüz bir mimari yüklenmedi.
+                          {t('empty_prompt_hint')}
                         </div>
                       )}
                     </div>
@@ -841,18 +931,18 @@ export default function App() {
                       <div className="flex items-center justify-between">
                         <span className="text-ink-muted uppercase tracking-wider text-[11px] font-semibold flex items-center gap-1.5">
                           <Palette className="h-3.5 w-3.5 text-amber-cad" />
-                          Malzeme Envanteri
+                          {t('tab_palette')}
                         </span>
-                        <span className="text-ink-dim text-[10px]">{filteredBlocks.length} Filtrelendi</span>
+                        <span className="text-ink-dim text-[10px]">{filteredBlocks.length}</span>
                       </div>
 
                       {/* Kategori Filtre Hapları */}
                       <div className="flex rounded-lg border border-line bg-surface p-0.5 gap-0.5 text-[10px]">
                         {[
-                          { id: 'all', label: 'Tümü' },
-                          { id: 'stone', label: 'Taş/Beton' },
-                          { id: 'light', label: 'Işık/Lav' },
-                          { id: 'organic', label: 'Doğal/Cam' },
+                          { id: 'all', label: t('palette_cat_all') },
+                          { id: 'stone', label: t('palette_cat_stone') },
+                          { id: 'light', label: t('palette_cat_light') },
+                          { id: 'organic', label: t('palette_cat_organic') },
                         ].map((cat) => (
                           <button
                             key={cat.id}
@@ -876,17 +966,17 @@ export default function App() {
                           type="text"
                           value={paletteSearch}
                           onChange={(e) => setPaletteSearch(e.target.value)}
-                          placeholder="minecraft:block_id filtrele..."
+                          placeholder={t('palette_search')}
                           className="w-full rounded-lg border border-line bg-surface py-1 pl-8 pr-3 text-[11px] text-ink outline-none placeholder:text-ink-dim focus:border-amber-cad/50"
                         />
                       </div>
 
                       {filteredBlocks.length === 0 ? (
                         <div className="p-4 text-center text-ink-dim text-[11px]">
-                          {structure ? 'Filtreye uygun blok bulunamadı' : 'Envanter boş'}
+                          {t('no_blocks_found')}
                         </div>
                       ) : (
-                        <ul className="space-y-1.5 max-h-[320px] overflow-y-auto pr-1">
+                        <ul className="space-y-1.5 max-h-[300px] overflow-y-auto pr-1">
                           {filteredBlocks.map(([name, count]) => {
                             const pct = ((count / stats.total) * 100).toFixed(1);
                             return (
@@ -914,28 +1004,146 @@ export default function App() {
                       )}
                     </div>
                   </div>
-                ) : (
-                  /* WorldEdit & Sunucu Dağıtım Sekmesi */
+                )}
+
+                {/* SURVIVAL BOM (ALISVERIS LISTESI) SEKMESI */}
+                {rightTab === 'survival' && (
+                  <div className="space-y-3.5">
+                    <span className="text-ink-muted uppercase tracking-wider text-[11px] font-semibold flex items-center gap-1.5">
+                      <PackageCheck className="h-3.5 w-3.5 text-emerald-cad" />
+                      {t('survival_title')}
+                    </span>
+
+                    <p className="text-[11px] text-ink-dim leading-relaxed">
+                      {t('survival_desc')}
+                    </p>
+
+                    {survivalData ? (
+                      <div className="space-y-3">
+                        {/* Shulker & Stack Özet Kartı */}
+                        <div className="grid grid-cols-3 gap-1.5 text-center text-[10px]">
+                          <div className="rounded-xl border border-line bg-surface p-2">
+                            <div className="text-ink-dim">{t('survival_total_blocks')}</div>
+                            <div className="text-amber-cad font-bold text-xs mt-0.5">
+                              {survivalData.total.toLocaleString()}
+                            </div>
+                          </div>
+                          <div className="rounded-xl border border-line bg-surface p-2">
+                            <div className="text-ink-dim">{t('survival_shulkers')}</div>
+                            <div className="text-emerald-cad font-bold text-xs mt-0.5">
+                              {survivalData.totalShulkers} Sb
+                            </div>
+                          </div>
+                          <div className="rounded-xl border border-line bg-surface p-2">
+                            <div className="text-ink-dim">{t('survival_stacks')}</div>
+                            <div className="text-cyan-cad font-bold text-xs mt-0.5">
+                              {survivalData.totalStacks} St
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Aksiyon Düğmeleri: Discord Kopyala & Vanilla .mcfunction */}
+                        <div className="grid grid-cols-2 gap-1.5">
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.97 }}
+                            type="button"
+                            onClick={handleCopyDiscordBOM}
+                            className="cursor-pointer flex items-center justify-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-2 text-[10px] text-ink hover:bg-surface-hover hover:border-emerald-cad/40 transition-colors shadow-sm font-semibold"
+                          >
+                            {copiedDiscord ? (
+                              <Check className="h-3 w-3 text-emerald-cad" />
+                            ) : (
+                              <Copy className="h-3 w-3 text-ink-dim" />
+                            )}
+                            <span className="truncate">{t('survival_copy_discord')}</span>
+                          </motion.button>
+
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.97 }}
+                            type="button"
+                            onClick={handleDownloadMcfunction}
+                            className="cursor-pointer flex items-center justify-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-2 text-[10px] text-amber-cad hover:bg-surface-hover hover:border-amber-cad/40 transition-colors shadow-sm font-semibold"
+                          >
+                            <FileCode className="h-3 w-3" />
+                            <span className="truncate">.mcfunction</span>
+                          </motion.button>
+                        </div>
+
+                        {/* Detaylı Malzeme Listesi */}
+                        <div className="space-y-1.5 pt-1">
+                          <div className="text-[10px] text-ink-dim uppercase">
+                            {lang === 'tr' ? 'Malzeme Ayrıştırması' : 'Material Breakdown'}:
+                          </div>
+                          <ul className="space-y-1.5 max-h-[300px] overflow-y-auto pr-1">
+                            {survivalData.list.map((item) => (
+                              <li
+                                key={item.name}
+                                className="rounded-lg border border-line bg-surface/70 p-2 text-[11px] space-y-1"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2 truncate">
+                                    <span
+                                      className="h-3 w-3 shrink-0 rounded border border-white/20 shadow-sm"
+                                      style={{ background: colorFor(item.name) }}
+                                    />
+                                    <span className="truncate text-ink font-mono font-medium">{item.name}</span>
+                                  </div>
+                                  <span className="text-amber-cad font-bold shrink-0">
+                                    {item.count.toLocaleString()}x
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2 text-[10px] text-ink-dim font-mono">
+                                  {item.shulkers > 0 && (
+                                    <span className="text-emerald-cad font-semibold">
+                                      {item.shulkers} {t('survival_format_shulker')}
+                                    </span>
+                                  )}
+                                  {item.stacks > 0 && (
+                                    <span className="text-cyan-cad">
+                                      {item.stacks} {t('survival_format_stack')}
+                                    </span>
+                                  )}
+                                  {item.remBlocks > 0 && (
+                                    <span>
+                                      {item.remBlocks} {t('survival_format_block')}
+                                    </span>
+                                  )}
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-line bg-surface/50 p-4 text-center text-ink-dim text-[11px]">
+                        {t('empty_prompt_hint')}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* WORLDEDIT & SUNUCU DAGITIM SEKMESI */}
+                {rightTab === 'deployment' && (
                   <div className="space-y-4">
                     <span className="text-ink-muted uppercase tracking-wider text-[11px] font-semibold flex items-center gap-1.5">
                       <FolderDown className="h-3.5 w-3.5 text-amber-cad" />
-                      WorldEdit & Sunucu Dağıtımı
+                      {t('deployment_title')}
                     </span>
 
                     <div className="rounded-xl border border-line bg-surface/70 p-3 space-y-2 text-[11px] text-ink-dim leading-relaxed">
                       <div className="text-ink font-semibold flex items-center gap-1">
                         <Check className="h-3.5 w-3.5 text-emerald-cad" />
-                        FAWE / Axiom Uyumlu
+                        FAWE / Axiom / WorldEdit 7+
                       </div>
-                      <p>
-                        İndirilen .schem dosyasını sunucunuzun <code className="text-amber-cad">plugins/WorldEdit/schematics/</code> klasörüne atıp aşağıdaki komutla yapıştırabilirsiniz.
-                      </p>
+                      <p>{t('deployment_desc')}</p>
                     </div>
 
                     {structure ? (
                       <div className="space-y-2.5">
                         <div className="rounded-xl border border-line bg-surface p-3 font-mono text-[11px] text-ink space-y-1.5 shadow-inner">
-                          <div className="text-ink-dim text-[10px]">// Yapıştırma Komutları:</div>
+                          <div className="text-ink-dim text-[10px]">// WorldEdit:</div>
                           <div className="text-amber-cad select-all font-semibold">
                             //schem load {(structure.structure_name || 'structure').replace(/[^a-z0-9_-]+/gi, '_')}
                           </div>
@@ -952,12 +1160,12 @@ export default function App() {
                           {copiedCmd ? (
                             <>
                               <Check className="h-3.5 w-3.5 text-emerald-cad" />
-                              <span className="text-emerald-cad">Komutlar Kopyalandı</span>
+                              <span className="text-emerald-cad">{t('copied_cmd_toast')}</span>
                             </>
                           ) : (
                             <>
                               <Copy className="h-3.5 w-3.5 text-ink-muted" />
-                              <span>Komutları Kopyala</span>
+                              <span>{t('copy_cmd')}</span>
                             </>
                           )}
                         </motion.button>
@@ -971,12 +1179,12 @@ export default function App() {
                           className="cursor-pointer flex w-full items-center justify-center gap-1.5 rounded-xl bg-amber-cad py-2.5 font-bold text-base hover:bg-amber-400 transition-colors disabled:opacity-40 shadow-lg shadow-amber-cad/10"
                         >
                           <Download className="h-3.5 w-3.5" />
-                          <span>{downloading ? 'Paketleniyor…' : '.schem İndir (Sponge v2)'}</span>
+                          <span>{downloading ? t('compiling') : `${t('download_schem')} (Sponge v2)`}</span>
                         </motion.button>
                       </div>
                     ) : (
                       <div className="rounded-xl border border-line bg-surface/50 p-4 text-center text-ink-dim text-[11px]">
-                        Komutları ve dosyayı üretmek için önce bir mimari çalıştırın.
+                        {t('empty_prompt_hint')}
                       </div>
                     )}
                   </div>
