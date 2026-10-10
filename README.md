@@ -92,16 +92,29 @@ graph TD
 | `terrain` | **FBM 3D Simplex Noise** octaves | Natural rock cliffs, jagged mountain peaks, crater lakes. |
 | `pattern` | **Weighted Monte-Carlo Blend** | `%` dithering gradients (`60%blackstone,30%deepslate,10%magma`). |
 
-### 🖥️ Tripartite CAD Workstation UI/UX
+### 🎨 Live Palette Swapper & 1-Click Instant Themes (0ms Latency)
+- **Instant Palette Remapping:** Swap any block throughout the entire 3D model with 0ms latency. No regeneration needed!
+- **1-Click Viral Theme Presets:**
+  - 🌋 **Nether Corrupted:** Transforms stone to Blackstone, wood to Crimson Planks, lights to Magma & Shroomlight.
+  - 🌸 **Cherry Blossom:** Remaps wood to Cherry Planks, stone to Calcite & Quartz, glass to Pink Stained Glass.
+  - ❄️ **Glacial Ice:** Remaps stone to Packed Ice, structures to Blue Ice, lights to Sea Lanterns.
+  - 🏛️ **Ancient Ruin:** Weathered mossy stone bricks, cracked deepslate, and overgrown foliage.
+- **Granular Block Swapper:** Click any block in the palette to swap it with custom Minecraft IDs.
+
+### 🎒 Survival Bill of Materials (BOM) & Multi-Format Exports
+- **Survival Shulker & Stack Calculator:** Computes exact **Full Shulker Boxes** (27 stacks = 1,728 blocks), **64-Item Stacks**, and remainder blocks for survival mode building.
+- **1-Click Discord Markdown Export:** Formats and copies a clean shopping list ready to send to survival teammates.
+- **Vanilla `.mcfunction` Export:** Runs on pure vanilla servers without WorldEdit or mods via `/setblock` commands.
+- **3D Wavefront `.OBJ` Export:** Native `.obj` mesh for **Blender Cycles/Eevee 3D renders**, Cinema4D, and **3D printing**.
+- **Sponge Schematic v2 (`.schem`):** Strict NBT gzip export natively recognized by WorldEdit 7+, FAWE, Axiom, and Litematica.
+
+### 🖥️ Tripartite CAD Workstation UI/UX & 4 Dimension Atmospheres
+- **4 Atmospheric Worlds:** Toggle between **Studio CAD**, **Overworld Daylight**, **Nether Crimson Fog**, and **The End Cosmic Void** with real-time Three.js volumetric fog and directional lighting.
+- **Dual-Language Support (TR / EN):** Instant language switcher (`🇹🇷 TR` / `🇬🇧 EN`) with persistent user preferences.
 - **Always-On 3D Viewport:** Instant WebGL stage with interactive 16×16 chunk grid, holographic coordinate compass, and orientation axes.
-- **Real-Time Voxel Raycasting:** Hover over any block in the 3D scene to inspect its Minecraft ID, global coordinates `[X, Y, Z]`, and vertical layer height.
-- **AAA Cinematic Post-Processing:** Powered by `@react-three/postprocessing` Bloom — Shroomlight dragon eyes, Magma cracks, Crying Obsidian runes, and Lava cascades realistically glow in the dark!
+- **Real-Time Voxel Raycasting:** Hover over any block to inspect its Minecraft ID, global coordinates `[X, Y, Z]`, and vertical layer height.
 - **Vertical Layer Slicer (HUD):** Interactive vertical scrub bar to slice and inspect the building layer-by-layer (`Y = 0` to `Y = Max`).
 - **Tactile Framer Motion Physics:** Spring-damped folding drawers, gliding pill tabs (`layoutId`), and celebratory `canvas-confetti` on schematic completion.
-
-### 📦 Seamless Minecraft Server Integration
-- **Sponge Schematic v2 (.schem):** Strict NBT compound serialization with gzip compression compatible with WorldEdit, FastAsyncWorldEdit (FAWE), Axiom, and Litematica.
-- **1-Click Paste Commands:** Instant copy for `//schem load <name>` and `//paste -a` with immediate clipboard feedback.
 
 ---
 
