@@ -64,9 +64,22 @@ export const TRANSLATIONS = {
 
     // Sağ Panel - Başlık & Sekmeler
     inspector_title: 'Mimari Denetçi',
-    tab_palette: 'Palet',
+    tab_palette: 'Palet & Tema',
     tab_survival: 'Survival BOM',
     tab_deployment: 'WorldEdit',
+
+    // Hızlı Tema Dönüştürücü (Viral Özellik)
+    theme_presets_title: 'Hızlı Tema Dönüştürücü',
+    theme_nether: 'Nether İstilası',
+    theme_cherry: 'Kiraz Bahçesi',
+    theme_frozen: 'Buzul Arktik',
+    theme_ancient: 'Antik Harabe',
+    theme_reset: 'Temayı Sıfırla',
+    swap_block_btn: 'Değiştir',
+    swap_modal_title: 'Blok Dönüştürücü',
+    swap_search: 'Yeni blok ara...',
+    toast_theme_applied: 'Hızlı Tema Başarıyla Uygulandı!',
+    toast_block_swapped: 'Blok Başarıyla Dönüştürüldü!',
 
     // Metrikler
     metric_volume: 'Hacim',
@@ -100,8 +113,8 @@ export const TRANSLATIONS = {
     survival_format_block: 'Blok',
 
     // WorldEdit & Dağıtım Sekmesi
-    deployment_title: 'WorldEdit Dağıtım Merkezi',
-    deployment_desc: 'Minecraft sunucunuzda tek komutla yapıyı dünyanıza yerleştirin.',
+    deployment_title: 'WorldEdit & 3D Dışa Aktarma',
+    deployment_desc: 'Minecraft sunucunuzda tek komutla yapıyı yerleştirin veya Blender için indirin.',
     step_1: '1. .schem İndirin:',
     step_1_desc: 'Yukarıdaki indirme butonuyla Sponge v2 dosyasını kaydedin.',
     step_2: '2. Sunucuya Yükleyin:',
@@ -109,6 +122,9 @@ export const TRANSLATIONS = {
     paste_tooltip: '-a bayrağı mevcut araziyle pürüzsüz birleşir (hava bloklarını atlar).',
     copy_cmd: 'Komutu Kopyala',
     copied_cmd_toast: 'WorldEdit Komutu Kopyalandı!',
+    download_obj_btn: '3D .OBJ İndir (Blender Mesh)',
+    download_obj_desc: 'Blender Cycles/Eevee ve 3D yazıcılar için standart Wavefront mesh.',
+    toast_obj_download: '3D .OBJ Mesh Dosyası İndirildi!',
 
     // 3D Viewport HUD & Kontroller
     vp_reset_camera: 'Kamera Bakışını Sıfırla',
@@ -116,10 +132,10 @@ export const TRANSLATIONS = {
     vp_grid: '16×16 Chunk Kılavuzu & Koordinat Izgarası',
     vp_bloom: 'Sinematik Bloom Işıması & Emissive Parıltı',
     vp_slicer: 'Y-Katman Kesit Analizi (Layer Slicer)',
-    vp_theme_cad: 'CAD Koyu Mühendislik Teması',
-    vp_theme_noon: 'Gün Ortası / Berrak Gökyüzü',
-    vp_theme_nether: 'Nether Cehennemi / Kızıl Sis',
-    vp_theme_dusk: 'Alacakaranlık / Sinematik Işık',
+    vp_theme_cad: 'CAD Koyu Stüdyo',
+    vp_theme_overworld: 'Overworld Öğle Güneşi',
+    vp_theme_nether: 'Nether Cehennem Sisi',
+    vp_theme_end: 'The End Kozmik Boyut',
     vp_fullscreen_enter: 'Tam Ekran Görünüm',
     vp_fullscreen_exit: 'Tam Ekrandan Çık',
 
@@ -195,9 +211,22 @@ export const TRANSLATIONS = {
 
     // Right Panel - Title & Tabs
     inspector_title: 'Architecture Inspector',
-    tab_palette: 'Palette',
+    tab_palette: 'Palette & Theme',
     tab_survival: 'Survival BOM',
     tab_deployment: 'WorldEdit',
+
+    // Instant Theme Presets
+    theme_presets_title: 'Instant Theme Transformer',
+    theme_nether: 'Nether Corrupted',
+    theme_cherry: 'Cherry Blossom',
+    theme_frozen: 'Glacial Ice',
+    theme_ancient: 'Ancient Ruin',
+    theme_reset: 'Reset Theme',
+    swap_block_btn: 'Swap',
+    swap_modal_title: 'Block Transformer',
+    swap_search: 'Search target block...',
+    toast_theme_applied: 'Instant Theme Applied Successfully!',
+    toast_block_swapped: 'Block Swapped Successfully!',
 
     // Metrics
     metric_volume: 'Volume',
@@ -231,8 +260,8 @@ export const TRANSLATIONS = {
     survival_format_block: 'Block',
 
     // WorldEdit & Deployment Tab
-    deployment_title: 'WorldEdit Deployment Center',
-    deployment_desc: 'Spawn the structure into your Minecraft world with a single command.',
+    deployment_title: 'WorldEdit & 3D Export',
+    deployment_desc: 'Spawn into your Minecraft server or export for 3D renders in Blender.',
     step_1: '1. Download .schem:',
     step_1_desc: 'Save the Sponge v2 binary file via the top download button.',
     step_2: '2. Upload to Server:',
@@ -240,6 +269,9 @@ export const TRANSLATIONS = {
     paste_tooltip: '-a flag skips air blocks to seamlessly merge with existing terrain.',
     copy_cmd: 'Copy Command',
     copied_cmd_toast: 'WorldEdit Command Copied!',
+    download_obj_btn: 'Download 3D .OBJ (Blender Mesh)',
+    download_obj_desc: 'Standard Wavefront mesh for Blender Cycles/Eevee renders & 3D printing.',
+    toast_obj_download: '3D .OBJ Mesh File Downloaded!',
 
     // 3D Viewport HUD & Controls
     vp_reset_camera: 'Reset Camera View',
@@ -247,10 +279,10 @@ export const TRANSLATIONS = {
     vp_grid: '16×16 Chunk Grid & Coordinate Axes',
     vp_bloom: 'Cinematic Bloom Glow & Emissive Shader',
     vp_slicer: 'Y-Axis Layer Slicer',
-    vp_theme_cad: 'CAD Dark Engineering Theme',
-    vp_theme_noon: 'High Noon / Clear Skies',
-    vp_theme_nether: 'Nether Realm / Crimson Fog',
-    vp_theme_dusk: 'Dusk / Sunset Cinematic Lighting',
+    vp_theme_cad: 'CAD Dark Studio',
+    vp_theme_overworld: 'Overworld Daylight',
+    vp_theme_nether: 'Nether Crimson Fog',
+    vp_theme_end: 'The End Cosmic Void',
     vp_fullscreen_enter: 'Fullscreen View',
     vp_fullscreen_exit: 'Exit Fullscreen',
 

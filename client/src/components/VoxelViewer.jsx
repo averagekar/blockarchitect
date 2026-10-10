@@ -243,27 +243,41 @@ export default function VoxelViewer({ structure, isFullscreen, onToggleFullscree
       dirIntensity: 1.75,
       gridChunk: '#383f52',
       gridSub: '#151720',
-      bloomIntensity: 0.7,
+      bloomIntensity: 0.75,
+      fog: '#07080a',
+    },
+    overworld: {
+      bg: '#142238',
+      hemiTop: '#93c5fd',
+      hemiBottom: '#14532d',
+      dirLight: '#fffbeb',
+      dirIntensity: 2.2,
+      gridChunk: '#1e3a8a',
+      gridSub: '#0f172a',
+      bloomIntensity: 0.5,
+      fog: '#172554',
     },
     nether: {
-      bg: '#090507',
+      bg: '#140306',
       hemiTop: '#ff6243',
       hemiBottom: '#240a10',
-      dirLight: '#ff4422',
-      dirIntensity: 2.1,
+      dirLight: '#ef4444',
+      dirIntensity: 2.4,
       gridChunk: '#57232b',
       gridSub: '#1a090d',
-      bloomIntensity: 1.3,
+      bloomIntensity: 1.4,
+      fog: '#24060c',
     },
-    dusk: {
-      bg: '#0b0a12',
-      hemiTop: '#fbcfe8',
-      hemiBottom: '#1f1b2e',
-      dirLight: '#f472b6',
-      dirIntensity: 1.8,
-      gridChunk: '#4a3d5e',
-      gridSub: '#1a1624',
-      bloomIntensity: 0.9,
+    end: {
+      bg: '#080512',
+      hemiTop: '#c084fc',
+      hemiBottom: '#180b2b',
+      dirLight: '#a855f7',
+      dirIntensity: 2.0,
+      gridChunk: '#3b1d64',
+      gridSub: '#150926',
+      bloomIntensity: 1.1,
+      fog: '#150926',
     },
   };
   const curTheme = themes[theme] || themes.studio;
@@ -282,6 +296,7 @@ export default function VoxelViewer({ structure, isFullscreen, onToggleFullscree
         }}
       >
         <color attach="background" args={[curTheme.bg]} />
+        <fog attach="fog" args={[curTheme.fog, Math.max(span * 1.2, 50), Math.max(span * 4.2, 280)]} />
         <hemisphereLight args={[curTheme.hemiTop, curTheme.hemiBottom, 0.85]} />
         <directionalLight position={[span * 1.3, span * 1.9, span * 0.9]} intensity={curTheme.dirIntensity} />
         <directionalLight position={[-span * 1.1, span * 0.7, -span * 1.1]} intensity={0.45} color="#94b8ff" />
@@ -481,7 +496,7 @@ export default function VoxelViewer({ structure, isFullscreen, onToggleFullscree
 
           <span className="mx-1 h-3.5 w-px bg-white/10" />
 
-          {/* Atmosfer / Işık Modu Seçici */}
+          {/* Atmosfer / Boyut Modu Seçici (CAD, Overworld, Nether, The End) */}
           <div className="flex items-center gap-0.5">
             <button
               type="button"
@@ -489,6 +504,16 @@ export default function VoxelViewer({ structure, isFullscreen, onToggleFullscree
               title={t('vp_theme_cad')}
               className={`cursor-pointer flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
                 theme === 'studio' ? 'text-amber-cad bg-surface-hover' : 'text-ink-dim hover:text-ink'
+              }`}
+            >
+              <Box className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setTheme('overworld')}
+              title={t('vp_theme_overworld')}
+              className={`cursor-pointer flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
+                theme === 'overworld' ? 'text-cyan-cad bg-surface-hover' : 'text-ink-dim hover:text-ink'
               }`}
             >
               <Sun className="h-3.5 w-3.5" />
@@ -505,13 +530,13 @@ export default function VoxelViewer({ structure, isFullscreen, onToggleFullscree
             </button>
             <button
               type="button"
-              onClick={() => setTheme('dusk')}
-              title={t('vp_theme_dusk')}
+              onClick={() => setTheme('end')}
+              title={t('vp_theme_end')}
               className={`cursor-pointer flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
-                theme === 'dusk' ? 'text-pink-400 bg-surface-hover' : 'text-ink-dim hover:text-ink'
+                theme === 'end' ? 'text-purple-400 bg-surface-hover' : 'text-ink-dim hover:text-ink'
               }`}
             >
-              <Sunset className="h-3.5 w-3.5" />
+              <Sparkles className="h-3.5 w-3.5" />
             </button>
           </div>
 

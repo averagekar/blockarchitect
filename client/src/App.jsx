@@ -1,5 +1,5 @@
 // BlockArchitect CAD Studio - Elite 3D Voxel Engine
-// Modüler & Rafine Tripartite Mimari: TR/EN Çift Dil Desteği, Survival BOM Hesaplayıcı, Gliding Pill Sekmeler ve Sonner Bildirimleri.
+// Modüler & Rafine Tripartite Mimari: Canlı Palet Dönüştürücü, Hızlı Temalar, 3D OBJ Export, Survival BOM ve TR/EN i18n.
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster, toast } from 'sonner';
@@ -7,6 +7,7 @@ import confetti from 'canvas-confetti';
 import VoxelViewer from './components/VoxelViewer.jsx';
 import { generateStructure, downloadSchem } from './lib/api.js';
 import { cleanId, colorFor } from './lib/blockColors.js';
+import { exportStructureToOBJ } from './lib/objExporter.js';
 import {
   LANGUAGES,
   TRANSLATIONS,
@@ -38,6 +39,8 @@ import {
   Globe,
   FileCode,
   PackageCheck,
+  RotateCcw,
+  RefreshCw,
 } from 'lucide-react';
 
 const MODEL_OPTIONS = [
@@ -47,6 +50,25 @@ const MODEL_OPTIONS = [
 ];
 
 const SNIPPET_ICONS = [Type, Flame, Cloud, Mountain, Landmark];
+
+const POPULAR_SWAP_BLOCKS = [
+  { id: 'minecraft:polished_blackstone_bricks', label: 'Blackstone Bricks' },
+  { id: 'minecraft:blackstone', label: 'Blackstone' },
+  { id: 'minecraft:deepslate_bricks', label: 'Deepslate Bricks' },
+  { id: 'minecraft:mossy_stone_bricks', label: 'Mossy Stone Bricks' },
+  { id: 'minecraft:crying_obsidian', label: 'Crying Obsidian' },
+  { id: 'minecraft:cherry_planks', label: 'Cherry Planks' },
+  { id: 'minecraft:crimson_planks', label: 'Crimson Planks' },
+  { id: 'minecraft:warped_planks', label: 'Warped Planks' },
+  { id: 'minecraft:calcite', label: 'Calcite' },
+  { id: 'minecraft:quartz_block', label: 'Quartz Block' },
+  { id: 'minecraft:shroomlight', label: 'Shroomlight' },
+  { id: 'minecraft:sea_lantern', label: 'Sea Lantern' },
+  { id: 'minecraft:magma_block', label: 'Magma Block' },
+  { id: 'minecraft:packed_ice', label: 'Packed Ice' },
+  { id: 'minecraft:blue_ice', label: 'Blue Ice' },
+  { id: 'minecraft:tinted_glass', label: 'Tinted Glass' },
+];
 
 export default function App() {
   // Dil Durumu (Persisted in localStorage)
@@ -77,6 +99,9 @@ export default function App() {
   const [dithering, setDithering] = useState(true);
 
   const [structure, setStructure] = useState(null);
+  const [paletteOverrides, setPaletteOverrides] = useState({});
+  const [swappingBlock, setSwappingBlock] = useState(null);
+
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState('');
@@ -96,6 +121,22 @@ export default function App() {
   // Aktif dilde hazır şablonlar ve hızlı kod parçacıkları
   const activeBlueprints = BLUEPRINTS_I18N[lang] || BLUEPRINTS_I18N.tr;
   const activeSnippets = QUICK_SNIPPETS_I18N[lang] || QUICK_SNIPPETS_I18N.tr;
+
+  // Canlı Palet Değişiklikleri Uygulanmış Efektif Yapı (0ms Gerçek Zamanlı Renklendirme)
+  const effectiveStructure = useMemo(() => {
+    if (!structure) return null;
+    if (Object.keys(paletteOverrides).length === 0) return structure;
+    const newPalette = structure.palette.map((blockId) => {
+      const clean = cleanId(blockId);
+      if (paletteOverrides[clean]) return paletteOverrides[clean];
+      if (paletteOverrides[blockId]) return paletteOverrides[blockId];
+      return blockId;
+    });
+    return {
+      ...structure,
+      palette: newPalette,
+    };
+  }, [structure, paletteOverrides]);
 
   // Model menüsünü dışarı tıklandığında kapat
   useEffect(() => {
@@ -139,6 +180,7 @@ export default function App() {
     if (!prompt.trim() || loading) return;
     setLoading(true);
     setError('');
+    setPaletteOverrides({});
     try {
       let fullPrompt = prompt.trim();
       if (maxSpan) fullPrompt += ` (Span limit: ${maxSpan} blocks)`;
@@ -169,13 +211,13 @@ export default function App() {
   }
 
   async function handleDownload() {
-    if (!structure) return;
+    if (!effectiveStructure) return;
     setDownloading(true);
     setError('');
     try {
-      await downloadSchem(structure);
+      await downloadSchem(effectiveStructure);
       toast.success(t('toast_download_schem'), {
-        description: `${structure.structure_name}.schem (Sponge v2)`,
+        description: `${effectiveStructure.structure_name}.schem (Sponge v2)`,
       });
     } catch (err) {
       setError(err.message);
@@ -185,9 +227,19 @@ export default function App() {
     }
   }
 
+  function handleDownloadOBJ() {
+    if (!effectiveStructure) return;
+    try {
+      exportStructureToOBJ(effectiveStructure);
+      toast.success(t('toast_obj_download'));
+    } catch (err) {
+      toast.error('OBJ Export Error', { description: err.message });
+    }
+  }
+
   function handleCopyCommand() {
-    if (!structure) return;
-    const safeName = (structure.structure_name || 'structure').replace(/[^a-z0-9_-]+/gi, '_');
+    if (!effectiveStructure) return;
+    const safeName = (effectiveStructure.structure_name || 'structure').replace(/[^a-z0-9_-]+/gi, '_');
     const cmd = `//schem load ${safeName}\n//paste -a`;
     navigator.clipboard.writeText(cmd);
     setCopiedCmd(true);
@@ -197,12 +249,71 @@ export default function App() {
     setTimeout(() => setCopiedCmd(false), 2000);
   }
 
-  // Survival Malzeme Hesaplaması (Shulker Box + Stack + Item Formülü)
+  // 1-Tık Hızlı Tema Dönüştürücü Fonksiyonu (Viral Özellik)
+  function applyThemePreset(themeKey) {
+    if (!structure) return;
+    if (themeKey === 'reset') {
+      setPaletteOverrides({});
+      toast.info(t('toast_theme_applied'));
+      return;
+    }
+
+    const newOverrides = {};
+    for (const blockId of structure.palette) {
+      const clean = cleanId(blockId);
+      if (themeKey === 'nether') {
+        if (/stone_brick|deepslate_brick/.test(clean)) {
+          newOverrides[clean] = 'minecraft:polished_blackstone_bricks';
+        } else if (/stone|deepslate|cobblestone|andesite|tuff/.test(clean)) {
+          newOverrides[clean] = 'minecraft:blackstone';
+        } else if (/planks|log|wood/.test(clean)) {
+          newOverrides[clean] = 'minecraft:crimson_planks';
+        } else if (/shroomlight|glowstone|lantern|sea_lantern/.test(clean)) {
+          newOverrides[clean] = 'minecraft:magma_block';
+        } else if (/glass/.test(clean)) {
+          newOverrides[clean] = 'minecraft:red_stained_glass';
+        }
+      } else if (themeKey === 'cherry') {
+        if (/planks|wood|log/.test(clean)) {
+          newOverrides[clean] = 'minecraft:cherry_planks';
+        } else if (/stone_brick|deepslate/.test(clean)) {
+          newOverrides[clean] = 'minecraft:calcite';
+        } else if (/stone|blackstone/.test(clean)) {
+          newOverrides[clean] = 'minecraft:quartz_block';
+        } else if (/glass/.test(clean)) {
+          newOverrides[clean] = 'minecraft:pink_stained_glass';
+        }
+      } else if (themeKey === 'frozen') {
+        if (/stone|deepslate|blackstone/.test(clean)) {
+          newOverrides[clean] = 'minecraft:packed_ice';
+        } else if (/planks|wood|concrete/.test(clean)) {
+          newOverrides[clean] = 'minecraft:blue_ice';
+        } else if (/glowstone|lantern|torch/.test(clean)) {
+          newOverrides[clean] = 'minecraft:sea_lantern';
+        } else if (/glass/.test(clean)) {
+          newOverrides[clean] = 'minecraft:cyan_stained_glass';
+        }
+      } else if (themeKey === 'ancient') {
+        if (/stone_brick/.test(clean)) {
+          newOverrides[clean] = 'minecraft:mossy_stone_bricks';
+        } else if (/cobblestone/.test(clean)) {
+          newOverrides[clean] = 'minecraft:mossy_cobblestone';
+        } else if (/stone|andesite/.test(clean)) {
+          newOverrides[clean] = 'minecraft:cracked_stone_bricks';
+        }
+      }
+    }
+
+    setPaletteOverrides(newOverrides);
+    toast.success(t('toast_theme_applied'));
+  }
+
+  // Survival Malzeme Hesaplaması
   const survivalData = useMemo(() => {
-    if (!structure || !structure.blocks) return null;
+    if (!effectiveStructure || !effectiveStructure.blocks) return null;
     const counts = new Map();
-    for (const b of structure.blocks) {
-      const raw = structure.palette[b.state];
+    for (const b of effectiveStructure.blocks) {
+      const raw = effectiveStructure.palette[b.state];
       if (!raw) continue;
       const name = cleanId(raw);
       counts.set(name, (counts.get(name) || 0) + 1);
@@ -215,17 +326,17 @@ export default function App() {
       return { name, count, shulkers, stacks, remBlocks };
     });
     list.sort((a, b) => b.count - a.count);
-    const total = structure.blocks.length;
+    const total = effectiveStructure.blocks.length;
     const totalShulkers = Math.floor(total / (27 * 64));
     const totalStacks = Math.floor(total / 64);
     return { list, total, totalShulkers, totalStacks };
-  }, [structure]);
+  }, [effectiveStructure]);
 
   function handleCopyDiscordBOM() {
-    if (!survivalData || !structure) return;
+    if (!survivalData || !effectiveStructure) return;
     const lines = [
       `📦 **BlockArchitect Survival ${t('survival_title')}**`,
-      `🏰 ${lang === 'tr' ? 'Yapı' : 'Structure'}: **${structure.structure_name}** | ${t('survival_total_blocks')}: **${survivalData.total.toLocaleString()}**`,
+      `🏰 ${lang === 'tr' ? 'Yapı' : 'Structure'}: **${effectiveStructure.structure_name}** | ${t('survival_total_blocks')}: **${survivalData.total.toLocaleString()}**`,
       `🎒 ${lang === 'tr' ? 'Toplam İhtiyaç' : 'Total Required'}: **${survivalData.totalShulkers} ${t('survival_format_shulker')} + ${survivalData.totalStacks} ${t('survival_format_stack')}**`,
       `─────────────────────────────────────`,
     ];
@@ -243,18 +354,18 @@ export default function App() {
   }
 
   function handleDownloadMcfunction() {
-    if (!structure || !structure.blocks) return;
+    if (!effectiveStructure || !effectiveStructure.blocks) return;
     const lines = [
       `# ==========================================`,
       `# BlockArchitect CAD Studio - Vanilla Export`,
-      `# Structure: ${structure.structure_name}`,
-      `# Total Blocks: ${structure.blocks.length}`,
+      `# Structure: ${effectiveStructure.structure_name}`,
+      `# Total Blocks: ${effectiveStructure.blocks.length}`,
       `# Date: ${new Date().toISOString()}`,
       `# ==========================================`,
       ``,
     ];
-    for (const b of structure.blocks) {
-      const raw = structure.palette[b.state];
+    for (const b of effectiveStructure.blocks) {
+      const raw = effectiveStructure.palette[b.state];
       if (!raw) continue;
       const id = cleanId(raw);
       lines.push(`setblock ~${b.x} ~${b.y} ~${b.z} ${id}`);
@@ -263,26 +374,26 @@ export default function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    const safeName = (structure.structure_name || 'structure').replace(/[^a-z0-9_-]+/gi, '_');
+    const safeName = (effectiveStructure.structure_name || 'structure').replace(/[^a-z0-9_-]+/gi, '_');
     a.download = `${safeName}.mcfunction`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success(t('survival_mcfunction_toast'));
   }
 
-  const dims = structure?.dimensions;
+  const dims = effectiveStructure?.dimensions;
 
   const stats = useMemo(() => {
-    if (!structure) return { topBlocks: [], total: 0 };
+    if (!effectiveStructure) return { topBlocks: [], total: 0 };
     const counts = new Map();
-    for (const b of structure.blocks) {
-      const name = cleanId(structure.palette[b.state]);
+    for (const b of effectiveStructure.blocks) {
+      const name = cleanId(effectiveStructure.palette[b.state]);
       counts.set(name, (counts.get(name) || 0) + 1);
     }
-    const total = structure.blocks.length;
+    const total = effectiveStructure.blocks.length;
     const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
     return { topBlocks: sorted, total };
-  }, [structure]);
+  }, [effectiveStructure]);
 
   // Malzeme Kategori Filtreleme
   const filteredBlocks = useMemo(() => {
@@ -333,7 +444,7 @@ export default function App() {
           {/* Aktif Şema Adı */}
           <div className="flex items-center gap-1.5 text-[11px] text-ink-muted">
             <span className="text-ink font-medium">
-              {structure ? `${structure.structure_name}.schem` : 'untitled_project.schem'}
+              {effectiveStructure ? `${effectiveStructure.structure_name}.schem` : 'untitled_project.schem'}
             </span>
             <span className="rounded bg-surface px-1.5 py-0.2 text-[9px] text-ink-dim border border-line font-mono">
               Sponge v2
@@ -427,7 +538,7 @@ export default function App() {
 
           <span className="h-3 w-px bg-white/10" />
 
-          {structure && (
+          {effectiveStructure && (
             <>
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -796,14 +907,14 @@ export default function App() {
         {/* ORTA: KESİNTİSİZ VE DAİMİ 3B VIEWPORT */}
         <main className="relative flex-1 h-full w-full bg-base overflow-hidden">
           <VoxelViewer
-            structure={structure}
+            structure={effectiveStructure}
             isFullscreen={isFullscreen}
             onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
             lang={lang}
           />
         </main>
 
-        {/* SAĞ CAD DENETÇİ PANELİ (320px - Palet, Survival BOM & WorldEdit) */}
+        {/* SAĞ CAD DENETÇİ PANELİ (330px - Palet, Survival BOM & WorldEdit) */}
         <AnimatePresence initial={false}>
           {rightOpen && !isFullscreen && (
             <motion.aside
@@ -887,11 +998,11 @@ export default function App() {
                         {t('metric_volume')} & {t('metric_voxels')}
                       </span>
 
-                      {structure ? (
+                      {effectiveStructure ? (
                         <div className="rounded-xl border border-line bg-surface p-3 space-y-2.5 shadow-sm">
                           <div className="flex items-center justify-between">
                             <span className="text-ink font-bold text-sm tracking-tight truncate">
-                              {structure.structure_name}
+                              {effectiveStructure.structure_name}
                             </span>
                             <span className="text-emerald-cad text-[10px] bg-emerald-cad/10 px-1.5 py-0.5 rounded border border-emerald-cad/20 font-semibold">
                               OK
@@ -925,6 +1036,74 @@ export default function App() {
                         </div>
                       )}
                     </div>
+
+                    {/* HIZLI TEMA DÖNÜŞTÜRÜCÜ (Viral 1-Click Themes) */}
+                    {effectiveStructure && (
+                      <div className="space-y-2 pt-2 border-t border-line">
+                        <div className="flex items-center justify-between">
+                          <span className="text-ink-muted uppercase tracking-wider text-[10px] font-semibold flex items-center gap-1.5">
+                            <Sparkles className="h-3 w-3 text-amber-cad" />
+                            {t('theme_presets_title')}
+                          </span>
+                          {Object.keys(paletteOverrides).length > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => applyThemePreset('reset')}
+                              className="cursor-pointer text-[10px] text-amber-cad hover:underline flex items-center gap-1"
+                            >
+                              <RotateCcw className="h-2.5 w-2.5" />
+                              {t('theme_reset')}
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-1.5 text-[10px] font-mono">
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.97 }}
+                            type="button"
+                            onClick={() => applyThemePreset('nether')}
+                            className="cursor-pointer flex items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/10 p-2 text-red-200 hover:bg-red-500/20 transition-colors font-semibold"
+                          >
+                            <span>🌋</span>
+                            <span className="truncate">{t('theme_nether')}</span>
+                          </motion.button>
+
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.97 }}
+                            type="button"
+                            onClick={() => applyThemePreset('cherry')}
+                            className="cursor-pointer flex items-center gap-1.5 rounded-lg border border-pink-500/30 bg-pink-500/10 p-2 text-pink-200 hover:bg-pink-500/20 transition-colors font-semibold"
+                          >
+                            <span>🌸</span>
+                            <span className="truncate">{t('theme_cherry')}</span>
+                          </motion.button>
+
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.97 }}
+                            type="button"
+                            onClick={() => applyThemePreset('frozen')}
+                            className="cursor-pointer flex items-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 p-2 text-cyan-200 hover:bg-cyan-500/20 transition-colors font-semibold"
+                          >
+                            <span>❄️</span>
+                            <span className="truncate">{t('theme_frozen')}</span>
+                          </motion.button>
+
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.97 }}
+                            type="button"
+                            onClick={() => applyThemePreset('ancient')}
+                            className="cursor-pointer flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-2 text-emerald-200 hover:bg-emerald-500/20 transition-colors font-semibold"
+                          >
+                            <span>🏛️</span>
+                            <span className="truncate">{t('theme_ancient')}</span>
+                          </motion.button>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Malzeme Paleti & Kategori Filtresi */}
                     <div className="space-y-2.5 pt-2 border-t border-line">
@@ -976,7 +1155,7 @@ export default function App() {
                           {t('no_blocks_found')}
                         </div>
                       ) : (
-                        <ul className="space-y-1.5 max-h-[300px] overflow-y-auto pr-1">
+                        <ul className="space-y-1.5 max-h-[280px] overflow-y-auto pr-1">
                           {filteredBlocks.map(([name, count]) => {
                             const pct = ((count / stats.total) * 100).toFixed(1);
                             return (
@@ -992,7 +1171,18 @@ export default function App() {
                                     />
                                     <span className="truncate text-ink font-mono">{name}</span>
                                   </div>
-                                  <span className="text-amber-cad font-semibold">%{pct}</span>
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    <button
+                                      type="button"
+                                      onClick={() => setSwappingBlock(name)}
+                                      title={t('swap_block_btn')}
+                                      className="cursor-pointer text-[10px] text-ink-dim hover:text-amber-cad flex items-center gap-1 px-1.5 py-0.5 rounded bg-base/80 border border-white/5 hover:border-amber-cad/40 transition-colors"
+                                    >
+                                      <RefreshCw className="h-2.5 w-2.5" />
+                                      <span>{t('swap_block_btn')}</span>
+                                    </button>
+                                    <span className="text-amber-cad font-semibold">%{pct}</span>
+                                  </div>
                                 </div>
                                 <div className="h-1 w-full bg-base rounded-full overflow-hidden">
                                   <div className="h-full bg-amber-cad rounded-full" style={{ width: `${pct}%` }} />
@@ -1076,7 +1266,7 @@ export default function App() {
                           <div className="text-[10px] text-ink-dim uppercase">
                             {lang === 'tr' ? 'Malzeme Ayrıştırması' : 'Material Breakdown'}:
                           </div>
-                          <ul className="space-y-1.5 max-h-[300px] overflow-y-auto pr-1">
+                          <ul className="space-y-1.5 max-h-[280px] overflow-y-auto pr-1">
                             {survivalData.list.map((item) => (
                               <li
                                 key={item.name}
@@ -1124,7 +1314,7 @@ export default function App() {
                   </div>
                 )}
 
-                {/* WORLDEDIT & SUNUCU DAGITIM SEKMESI */}
+                {/* WORLDEDIT & 3D DIŞA AKTARMA SEKMESI */}
                 {rightTab === 'deployment' && (
                   <div className="space-y-4">
                     <span className="text-ink-muted uppercase tracking-wider text-[11px] font-semibold flex items-center gap-1.5">
@@ -1135,17 +1325,17 @@ export default function App() {
                     <div className="rounded-xl border border-line bg-surface/70 p-3 space-y-2 text-[11px] text-ink-dim leading-relaxed">
                       <div className="text-ink font-semibold flex items-center gap-1">
                         <Check className="h-3.5 w-3.5 text-emerald-cad" />
-                        FAWE / Axiom / WorldEdit 7+
+                        FAWE / Axiom / Blender 3D
                       </div>
                       <p>{t('deployment_desc')}</p>
                     </div>
 
-                    {structure ? (
+                    {effectiveStructure ? (
                       <div className="space-y-2.5">
                         <div className="rounded-xl border border-line bg-surface p-3 font-mono text-[11px] text-ink space-y-1.5 shadow-inner">
                           <div className="text-ink-dim text-[10px]">// WorldEdit:</div>
                           <div className="text-amber-cad select-all font-semibold">
-                            //schem load {(structure.structure_name || 'structure').replace(/[^a-z0-9_-]+/gi, '_')}
+                            //schem load {(effectiveStructure.structure_name || 'structure').replace(/[^a-z0-9_-]+/gi, '_')}
                           </div>
                           <div className="text-amber-cad select-all font-semibold">//paste -a</div>
                         </div>
@@ -1170,17 +1360,30 @@ export default function App() {
                           )}
                         </motion.button>
 
-                        <motion.button
-                          whileHover={{ scale: 1.01 }}
-                          whileTap={{ scale: 0.98 }}
-                          type="button"
-                          onClick={handleDownload}
-                          disabled={downloading}
-                          className="cursor-pointer flex w-full items-center justify-center gap-1.5 rounded-xl bg-amber-cad py-2.5 font-bold text-base hover:bg-amber-400 transition-colors disabled:opacity-40 shadow-lg shadow-amber-cad/10"
-                        >
-                          <Download className="h-3.5 w-3.5" />
-                          <span>{downloading ? t('compiling') : `${t('download_schem')} (Sponge v2)`}</span>
-                        </motion.button>
+                        <div className="grid grid-cols-2 gap-2 pt-1">
+                          <motion.button
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.98 }}
+                            type="button"
+                            onClick={handleDownload}
+                            disabled={downloading}
+                            className="cursor-pointer flex items-center justify-center gap-1.5 rounded-xl bg-amber-cad py-2.5 font-bold text-base hover:bg-amber-400 transition-colors disabled:opacity-40 shadow-lg shadow-amber-cad/10"
+                          >
+                            <Download className="h-3.5 w-3.5" />
+                            <span>.schem (Sponge v2)</span>
+                          </motion.button>
+
+                          <motion.button
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.98 }}
+                            type="button"
+                            onClick={handleDownloadOBJ}
+                            className="cursor-pointer flex items-center justify-center gap-1.5 rounded-xl border border-cyan-cad/40 bg-cyan-cad/10 py-2.5 font-bold text-cyan-cad hover:bg-cyan-cad/20 transition-colors shadow-sm"
+                          >
+                            <Box className="h-3.5 w-3.5" />
+                            <span>3D .OBJ (Blender)</span>
+                          </motion.button>
+                        </div>
                       </div>
                     ) : (
                       <div className="rounded-xl border border-line bg-surface/50 p-4 text-center text-ink-dim text-[11px]">
@@ -1194,6 +1397,62 @@ export default function App() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* BLOK DEGISTIRME MODALI */}
+      <AnimatePresence>
+        {swappingBlock && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 font-mono text-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.94 }}
+              className="w-full max-w-md rounded-2xl border border-line bg-panel p-5 shadow-2xl space-y-4"
+            >
+              <div className="flex items-center justify-between border-b border-line pb-3">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="h-3.5 w-3.5 rounded border border-white/20 shadow-sm"
+                    style={{ background: colorFor(swappingBlock) }}
+                  />
+                  <span className="font-bold text-sm text-ink">{t('swap_modal_title')}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSwappingBlock(null)}
+                  className="cursor-pointer text-ink-dim hover:text-ink text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="text-[11px] text-ink-muted">
+                <span className="text-amber-cad font-semibold">{swappingBlock}</span> {lang === 'tr' ? 'bloğu tüm yapıda şu blokla değiştirilecek:' : 'block will be replaced across the entire model with:'}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto pr-1">
+                {POPULAR_SWAP_BLOCKS.map((pb) => (
+                  <button
+                    key={pb.id}
+                    type="button"
+                    onClick={() => {
+                      setPaletteOverrides((prev) => ({ ...prev, [swappingBlock]: pb.id }));
+                      setSwappingBlock(null);
+                      toast.success(`${swappingBlock} ➔ ${pb.id}`);
+                    }}
+                    className="cursor-pointer flex items-center gap-2 rounded-lg border border-line bg-surface p-2 text-left hover:border-amber-cad/50 hover:bg-surface-hover transition-colors"
+                  >
+                    <span
+                      className="h-3 w-3 shrink-0 rounded border border-white/20 shadow-sm"
+                      style={{ background: colorFor(pb.id) }}
+                    />
+                    <span className="truncate text-ink font-medium">{pb.label}</span>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
