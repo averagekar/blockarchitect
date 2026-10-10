@@ -80,11 +80,14 @@ async function askDeepSeek(messages) {
 // GEMINI API ÇAĞRISI (GoogleGenAI SDK)
 // -------------------------------------------------------------
 const GEMINI_FALLBACKS = [
-  GEMINI_MODEL,
+  'gemini-3-flash-preview',
+  'gemini-3.5-flash',
+  'gemini-3.6-flash',
+  'gemini-3.7-flash',
+  'gemini-3.8-flash',
   'gemini-3.1-flash-lite',
   'gemini-3.5-flash-lite',
   'gemini-flash-lite-latest',
-  'gemini-3.8-flash',
 ].filter((v, i, a) => a.indexOf(v) === i);
 
 async function askGemini(promptText) {
@@ -96,15 +99,22 @@ async function askGemini(promptText) {
   for (const modelName of GEMINI_FALLBACKS) {
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
+        const config = {
+          systemInstruction: SYSTEM_PROMPT,
+          temperature: GEMINI_TEMP,
+          responseMimeType: 'application/json',
+          maxOutputTokens: 32768,
+        };
+
+        // Karmaşık uzamsal ve geometrik mantık yürütme için Thinking Budget
+        if (modelName.includes('3.5') || modelName.includes('3.6') || modelName.includes('3.7') || modelName.includes('3.8')) {
+          config.thinkingConfig = { thinkingBudget: 2048 };
+        }
+
         const response = await gemini.models.generateContent({
           model: modelName,
           contents: promptText,
-          config: {
-            systemInstruction: SYSTEM_PROMPT,
-            temperature: GEMINI_TEMP,
-            responseMimeType: 'application/json',
-            maxOutputTokens: 32768,
-          },
+          config,
         });
         const data = extractJson(response.text);
         return PlanSchema.parse(data);
@@ -112,13 +122,35 @@ async function askGemini(promptText) {
         lastErr = err;
         const msg = String(err.message || '');
         if (msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED')) {
-          console.warn(`[AI] ${modelName} günlük/dakikalık kota aşıldı.`);
-          break; // Kota aşıldıysa aynı modelde boşuna bekleme, diğerine geç
+          console.warn(`[AI] ${modelName} günlük/dakikalık kota aşıldı. Sıradaki modele geçiliyor...`);
+          break; // Kota aşıldıysa aynı modelde bekleme, diğer modele geç
         }
-        if (msg.includes('503') || msg.includes('high demand')) {
-          console.warn(`[AI] ${modelName} geçici yoğunluk (deneme ${attempt + 1}/2). Bekleniyor...`);
-          await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
-          continue;
+        if (msg.includes('503') || msg.includes('high demand') || msg.includes('UNAVAILABLE')) {
+          console.warn(`[AI] ${modelName} geçici yoğunluk (deneme ${attempt + 1}/2).`);
+          if (attempt === 0) {
+            await new Promise((r) => setTimeout(r, 1500));
+            continue;
+          }
+          break; // 2. denemede de meşgulse hemen diğer modele geç
+        }
+        // Eğer thinkingConfig desteklenmiyorsa normal dene
+        if (msg.includes('thinkingConfig') || msg.includes('budget')) {
+          try {
+            const fallbackRes = await gemini.models.generateContent({
+              model: modelName,
+              contents: promptText,
+              config: {
+                systemInstruction: SYSTEM_PROMPT,
+                temperature: GEMINI_TEMP,
+                responseMimeType: 'application/json',
+                maxOutputTokens: 32768,
+              },
+            });
+            const data = extractJson(fallbackRes.text);
+            return PlanSchema.parse(data);
+          } catch (e) {
+            lastErr = e;
+          }
         }
         break;
       }

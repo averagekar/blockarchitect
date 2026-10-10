@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-export const MAX_DIM = 256;
-export const MAX_VOLUME = 256 * 256 * 320;
+export const MAX_DIM = 400;
+export const MAX_VOLUME = 400 * 400 * 400;
 
 const int = z.number().int();
 const dim = int.min(1).max(MAX_DIM);

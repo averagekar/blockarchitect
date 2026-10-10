@@ -44,9 +44,9 @@ import {
 } from 'lucide-react';
 
 const MODEL_OPTIONS = [
-  { id: 'deepseek', label: 'DeepSeek-V3', badgeKey: 'model_recommended', descKey: 'model_deepseek_desc', icon: Cpu },
-  { id: 'gemini', label: 'Gemini 3.8 Flash', badgeKey: 'model_google', descKey: 'model_gemini_desc', icon: Sparkles },
-  { id: 'auto', label: 'Auto Router', badgeKey: 'model_failover', descKey: 'model_auto_desc', icon: Wand2 },
+  { id: 'auto', label: 'Auto Master Router', badgeKey: 'model_recommended', descKey: 'model_auto_desc', icon: Wand2 },
+  { id: 'gemini', label: 'Gemini Thinking (2026)', badgeKey: 'model_google', descKey: 'model_gemini_desc', icon: Sparkles },
+  { id: 'deepseek', label: 'DeepSeek-V3 / R1', badgeKey: 'model_failover', descKey: 'model_deepseek_desc', icon: Cpu },
 ];
 
 const SNIPPET_ICONS = [Type, Flame, Cloud, Mountain, Landmark];

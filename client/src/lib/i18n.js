@@ -28,9 +28,9 @@ export const TRANSLATIONS = {
     model_recommended: 'Önerilen',
     model_google: 'Google AI',
     model_failover: 'Yedekleme',
-    model_deepseek_desc: 'deepseek-chat • Yüksek Mantık & Hız (sk-4098...)',
-    model_gemini_desc: 'gemini-3.8-flash • Hızlı Geometri',
-    model_auto_desc: 'DeepSeek öncelikli, kotada otomatik geçiş',
+    model_deepseek_desc: 'DeepSeek R1 / V3 • Yüksek Mimari & Mantık',
+    model_gemini_desc: 'Gemini Thinking (2048 Bütçe) • 3B Uzamsal Geometri',
+    model_auto_desc: 'En akıllı model öncelikli, anında kesintisiz yedekleme',
 
     // Sol Panel - Sekmeler
     tab_directive: 'Mimari Yönerge',
@@ -175,9 +175,9 @@ export const TRANSLATIONS = {
     model_recommended: 'Recommended',
     model_google: 'Google AI',
     model_failover: 'Failover',
-    model_deepseek_desc: 'deepseek-chat • High Reasoning & Speed (sk-4098...)',
-    model_gemini_desc: 'gemini-3.8-flash • Rapid Geometry',
-    model_auto_desc: 'DeepSeek primary, automatic failover on quota',
+    model_deepseek_desc: 'DeepSeek R1 / V3 • High Architecture & Reasoning',
+    model_gemini_desc: 'Gemini Thinking (2048 Budget) • 3D Spatial Geometry',
+    model_auto_desc: 'Highest reasoning model primary, instant seamless failover',
 
     // Left Panel - Tabs
     tab_directive: 'Architecture Directive',

@@ -80,7 +80,26 @@ export const isKnownBlock = (name) => KNOWN.has(name);
 
 /** Bilinmeyen bir blok icin ayni ailede guvenli bir yedek. */
 export function fallbackBlock(name) {
-  const n = name.replace('minecraft:', '');
+  const n = name.replace('minecraft:', '').toLowerCase();
+  if (/lava/i.test(n)) return 'minecraft:lava';
+  if (/water/i.test(n)) return 'minecraft:water';
+  if (/fire|flame/i.test(n)) return 'minecraft:magma_block';
+  if (/glowstone|neon|shroom/i.test(n)) return 'minecraft:shroomlight';
+  if (/amethyst|crystal/i.test(n)) return 'minecraft:amethyst_block';
+  if (/gold/i.test(n)) return 'minecraft:gold_block';
+  if (/iron/i.test(n)) return 'minecraft:iron_block';
+  if (/diamond/i.test(n)) return 'minecraft:diamond_block';
+  if (/emerald/i.test(n)) return 'minecraft:emerald_block';
+  if (/copper/i.test(n)) return 'minecraft:copper_block';
+  if (/bone|horn|claw/i.test(n)) return 'minecraft:bone_block';
+  if (/obsidian/i.test(n)) return 'minecraft:obsidian';
+  if (/ice/i.test(n)) return 'minecraft:packed_ice';
+  if (/sand/i.test(n)) return 'minecraft:sand';
+  if (/dirt/i.test(n)) return 'minecraft:dirt';
+  if (/grass/i.test(n)) return 'minecraft:grass_block';
+  if (/brick/i.test(n)) return 'minecraft:stone_bricks';
+  if (/stone|rock/i.test(n)) return 'minecraft:stone';
+
   const rules = [
     [/_stairs$/, 'cobblestone_stairs'], [/_slab$/, 'cobblestone_slab'], [/_wall$/, 'cobblestone_wall'],
     [/_fence_gate$/, 'oak_fence_gate'], [/_fence$/, 'oak_fence'], [/_trapdoor$/, 'oak_trapdoor'], [/_door$/, 'oak_door'],

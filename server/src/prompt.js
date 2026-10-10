@@ -35,36 +35,87 @@ export const EXAMPLE_PLAN = {
 };
 
 // Few-shot ornek 2: Devasa Heykel / Ejderha Plani
+// Few-shot ornek 2: Devasa Heykel / Anatomik Ejderha Plani (Bacaklar, Penceler, Kanatlar, Ates)
 export const EXAMPLE_DRAGON_PLAN = {
-  structure_name: 'Colossal Dragon Sculpture',
+  structure_name: 'Colossal Inferno Dragon',
   materials: {
     rock: '60%minecraft:blackstone,30%minecraft:deepslate,10%minecraft:magma_block',
-    scales: '60%minecraft:blue_concrete,30%minecraft:blue_terracotta,10%minecraft:cyan_concrete',
-    belly: 'minecraft:white_concrete',
-    wing_bone: 'minecraft:dark_prismarine',
-    wing_skin: 'minecraft:light_blue_stained_glass',
+    scales: '60%minecraft:black_concrete,30%minecraft:crying_obsidian,10%minecraft:netherite_block',
+    belly: '60%minecraft:red_concrete,30%minecraft:orange_concrete,10%minecraft:magma_block',
+    bone: 'minecraft:bone_block',
+    wing_bone: 'minecraft:polished_blackstone',
+    wing_skin: '50%minecraft:red_stained_glass,30%minecraft:orange_stained_glass,20%minecraft:crying_obsidian',
     horn: 'minecraft:bone_block',
-    fire: '50%minecraft:orange_concrete,30%minecraft:red_concrete,20%minecraft:yellow_concrete',
+    fire: '40%minecraft:lava,30%minecraft:magma_block,20%minecraft:orange_concrete,10%minecraft:yellow_concrete',
+    glow: 'minecraft:shroomlight',
   },
   ops: [
-    { op: 'terrain', cx: 0, cz: 20, y: 0, rx: 35, rz: 35, height: 10, roughness: 0.6, block: 'rock' },
-    { op: 'ellipsoid', cx: 0, cy: 15, cz: 15, rx: 7, ry: 6, rz: 14, block: 'scales' },
-    { op: 'ellipsoid', cx: 0, cy: 12, cz: 15, rx: 5, ry: 3, rz: 12, block: 'belly' },
-    { op: 'curve', points: [[0, 16, 25], [0, 24, 30], [0, 32, 28], [0, 36, 35]], r1: 4.5, r2: 3, block: 'scales' },
-    { op: 'ellipsoid', cx: 0, cy: 37, cz: 38, rx: 4, ry: 3.5, rz: 6, block: 'scales' },
-    { op: 'tapered_cylinder', x1: 0, y1: 36, z1: 42, x2: 0, y2: 35, z2: 48, r1: 3, r2: 1.5, block: 'scales' },
-    { op: 'set', x: 3, y: 38, z: 40, block: 'minecraft:shroomlight' },
-    { op: 'set', x: -3, y: 38, z: 40, block: 'minecraft:shroomlight' },
-    { op: 'cone_3d', x1: 2.5, y1: 39, z1: 37, x2: 5, y2: 46, z2: 30, r1: 1.5, r2: 0.2, block: 'horn' },
-    { op: 'cone_3d', x1: -2.5, y1: 39, z1: 37, x2: -5, y2: 46, z2: 30, r1: 1.5, r2: 0.2, block: 'horn' },
-    { op: 'curve', points: [[0, 14, 5], [0, 12, -8], [4, 15, -20], [-5, 20, -32], [0, 25, -40]], r1: 4, r2: 0.8, block: 'scales' },
-    { op: 'curve', points: [[5, 18, 18], [25, 32, 16], [42, 38, 12]], r1: 2.5, r2: 1, block: 'wing_bone' },
-    { op: 'tapered_cylinder', x1: 25, y1: 32, z1: 16, x2: 35, y2: 18, z2: 14, r1: 1.2, r2: 0.5, block: 'wing_bone' },
-    { op: 'tapered_cylinder', x1: 42, y1: 38, z1: 12, x2: 48, y2: 24, z2: 10, r1: 1, r2: 0.3, block: 'wing_bone' },
-    { op: 'membrane', p1: [5, 18, 18], p2: [25, 32, 16], p3: [35, 18, 14], thickness: 1, block: 'wing_skin' },
-    { op: 'membrane', p1: [25, 32, 16], p2: [42, 38, 12], p3: [48, 24, 10], p4: [35, 18, 14], thickness: 1, block: 'wing_skin' },
+    // 1. Kayalik Zemin / Tabur
+    { op: 'terrain', cx: 0, cz: 15, y: 0, rx: 36, rz: 36, height: 8, roughness: 0.6, block: 'rock' },
+
+    // 2. Govde & Gögus Kasi
+    { op: 'ellipsoid', cx: 0, cy: 16, cz: 12, rx: 8, ry: 7, rz: 14, block: 'scales' },
+    { op: 'ellipsoid', cx: 0, cy: 12, cz: 12, rx: 6, ry: 4, rz: 12, block: 'belly' },
+
+    // 3. Sag On Bacak & Pence (Zemine basan)
+    { op: 'curve', points: [[7, 16, 18], [12, 10, 20], [14, 4, 22], [14, 1, 22]], r1: 3.2, r2: 1.8, block: 'scales' },
+    { op: 'cone_3d', x1: 14, y1: 2, z1: 22, x2: 15, y2: 0, z2: 26, r1: 1.2, r2: 0.2, block: 'bone' },
+    { op: 'cone_3d', x1: 12, y1: 2, z1: 22, x2: 12, y2: 0, z2: 26, r1: 1.0, r2: 0.2, block: 'bone' },
+
+    // 4. Sag Arka Bacak & Pence (Kuvvetli uyluk)
+    { op: 'ellipsoid', cx: 9, cy: 14, cz: 2, rx: 4.5, ry: 5.5, rz: 4.5, block: 'scales' },
+    { op: 'tapered_cylinder', x1: 9, y1: 11, z1: 2, x2: 11, y2: 3, z2: 0, r1: 2.5, r2: 1.5, block: 'scales' },
+    { op: 'cone_3d', x1: 11, y1: 3, z1: 0, x2: 13, y2: 0, z2: 3, r1: 1.1, r2: 0.2, block: 'bone' },
+
+    // 5. Boyun & Bas (S-Kavisli)
+    { op: 'curve', points: [[0, 18, 22], [0, 26, 28], [0, 36, 26], [0, 42, 34]], r1: 5.0, r2: 3.2, block: 'scales' },
+    { op: 'ellipsoid', cx: 0, cy: 43, cz: 38, rx: 4.5, ry: 4.0, rz: 6.5, block: 'scales' },
+    { op: 'tapered_cylinder', x1: 0, y1: 42, z1: 42, x2: 0, y2: 41, z2: 50, r1: 3.2, r2: 1.8, block: 'scales' },
+    { op: 'tapered_cylinder', x1: 0, y1: 39, z1: 42, x2: 0, y2: 38, z2: 48, r1: 2.2, r2: 1.2, block: 'belly' },
+    { op: 'set', x: 3.5, y: 44, z: 41, block: 'glow' },
+    { op: 'set', x: -3.5, y: 44, z: 41, block: 'glow' },
+
+    // 6. Boynuzlar
+    { op: 'cone_3d', x1: 3, y1: 45, z1: 37, x2: 7, y2: 54, z2: 28, r1: 1.8, r2: 0.3, block: 'bone' },
+    { op: 'cone_3d', x1: -3, y1: 45, z1: 37, x2: -7, y2: 54, z2: 28, r1: 1.8, r2: 0.3, block: 'bone' },
+
+    // 7. Kuyruk
+    { op: 'curve', points: [[0, 15, 0], [0, 13, -12], [6, 14, -26], [-6, 16, -40], [0, 20, -52]], r1: 4.2, r2: 0.8, block: 'scales' },
+
+    // 8. Sag Kanat (Ana kemik ve parmaklar)
+    { op: 'curve', points: [[6, 20, 14], [28, 38, 12], [48, 46, 8]], r1: 3.0, r2: 1.2, block: 'wing_bone' },
+    { op: 'tapered_cylinder', x1: 28, y1: 38, z1: 12, x2: 40, y2: 24, z2: 10, r1: 1.5, r2: 0.6, block: 'wing_bone' },
+    { op: 'tapered_cylinder', x1: 48, y1: 46, z1: 8, x2: 56, y2: 30, z2: 6, r1: 1.2, r2: 0.4, block: 'wing_bone' },
+    { op: 'membrane', p1: [6, 20, 14], p2: [28, 38, 12], p3: [40, 24, 10], thickness: 1, block: 'wing_skin' },
+    { op: 'membrane', p1: [28, 38, 12], p2: [48, 46, 8], p3: [56, 30, 6], p4: [40, 24, 10], thickness: 1, block: 'wing_skin' },
+
+    // 9. Simetri ile Bacaklar, Kanat ve Gözler Aynalanir
     { op: 'mirror', axis: 'x', at: 0 },
-    { op: 'cone_3d', x1: 0, y1: 35, z1: 48, x2: 0, y2: 28, z2: 72, r1: 1, r2: 10, block: 'fire' },
+
+    // 10. Agizdan Cikan Devasa Ates Konisi
+    { op: 'cone_3d', x1: 0, y1: 40, z1: 50, x2: 0, y2: 32, z2: 78, r1: 1.5, r2: 12, block: 'fire' },
+  ],
+};
+
+// Few-shot ornek 3: Anitsal Sunucu Logosu / NOVA Tapinagi (3D Yazi & Portal)
+export const EXAMPLE_LOGO_PLAN = {
+  structure_name: 'Monumental NOVA Server Shrine',
+  materials: {
+    foundation: '50%minecraft:polished_blackstone_bricks,30%minecraft:blackstone,20%minecraft:crying_obsidian',
+    gold_trim: '60%minecraft:gilded_blackstone,40%minecraft:gold_block',
+    neon: 'minecraft:sea_lantern',
+    text_gold: '50%minecraft:gold_block,30%minecraft:yellow_concrete,20%minecraft:ochre_froglight',
+    text_shadow: 'minecraft:black_concrete',
+  },
+  ops: [
+    { op: 'cylinder', cx: 0, cz: 0, y: 0, radius: 36, height: 4, block: 'foundation', axis: 'y' },
+    { op: 'cylinder', cx: 0, cz: 0, y: 4, radius: 30, height: 2, block: 'gold_trim', axis: 'y' },
+    { op: 'torus', cx: 0, cy: 30, cz: -4, R: 22, r: 2.5, axis: 'z', block: 'foundation' },
+    { op: 'tapered_cylinder', x1: -28, y1: 4, z1: 0, x2: -30, y2: 44, z2: 0, r1: 4, r2: 0.8, block: 'foundation' },
+    { op: 'mirror', axis: 'x', at: 0 },
+    // DOKUNULMAZ YAZI: Mirror islemlerinden SONRA yerlestirilir!
+    { op: 'text_3d', text: 'NOVA', cx: 0, y: 22, cz: 2, scale: 3, depth: 4, arch: 2, block: 'text_gold', outline: 'text_shadow', facing: 'south' },
+    { op: 'fill', x1: -24, y1: 18, z1: 0, x2: 24, y2: 20, z2: 2, block: 'neon' },
   ],
 };
 
@@ -154,15 +205,21 @@ You can provide rich texture blends in any "block" property or alias:
 - Natural rock: "50%minecraft:blackstone,30%minecraft:deepslate,20%minecraft:magma_block"
 - Gradient object: { "gradient": ["minecraft:blackstone", "minecraft:deepslate", "minecraft:cobbled_deepslate"], "axis": "y", "min": 0, "max": 25 }
 
-# HOW TO DESIGN ORGANICS & CREATURES (DRAGONS, BEASTS, STATUES)
-1. Pedestal/Terrain: Start with a jagged "terrain" rock base (blackstone, deepslate, lava cracks).
-2. Torso Mass: Elongated "ellipsoid" for the main body/chest. A smaller flatter ellipsoid for the belly plates.
-3. Flowing Spine/Neck/Tail: Use "curve" with 3-5 points for an S-curved neck and whipping tail. Use tapering radii (e.g. neck r1:4.5 -> r2:3).
-4. Head & Jaws: "ellipsoid" for cranium + "tapered_cylinder" for upper and lower snouts. Eyes with shroomlight or sea_lantern.
-5. Horns & Spikes: "cone_3d" pointing back/up for majestic horns. Rows of small cones or bone blocks along the spine.
-6. Wings: "curve" for the top bone spar, 2-3 "tapered_cylinder" finger bones branching down, then "membrane" patches between the bones!
-7. Fire/Magic Breath: Expanding "cone_3d" or "tapered_cylinder" starting at mouth and widening forward, textured with fire/lava/orange/yellow concrete blend.
-8. Symmetry: Build one side (left wing, left horn, left legs), then call { "op": "mirror", "axis": "x", "at": 0 }!
+# HOW TO DESIGN ORGANICS & CREATURES (DRAGONS, BEASTS, TITANS)
+1. Pedestal/Terrain: ALWAYS start with a wide jagged "terrain" rock base (y:0, rx:30-45, rz:30-45) or cliff plinth.
+2. Ground Anchoring & Stance: The creature MUST have solid forelegs and hindlegs connecting the chest/hips down to the rock! Use "curve" or "tapered_cylinder" for muscular legs and "cone_3d" for talons/claws gripping the stone. NEVER let a creature body float in mid-air unless the user explicitly asks for a flying dragon in clouds!
+3. Torso Mass: Elongated "ellipsoid" for the main body/chest. A smaller flatter ellipsoid for the belly plates.
+4. Flowing Spine/Neck/Tail: Use "curve" with 3-5 points for an S-curved neck and whipping tail. Use tapering radii (e.g. neck r1:5 -> r2:3).
+5. Head & Jaws: "ellipsoid" for cranium + "tapered_cylinder" for upper and lower snouts. Eyes with shroomlight or sea_lantern.
+6. Horns & Spikes: "cone_3d" pointing back/up for majestic horns. Rows of small cones or bone blocks along the spine.
+7. Wings: "curve" for the top bone spar, 2-3 "tapered_cylinder" finger bones branching down, then "membrane" patches between the bones!
+8. Fire/Magic Breath: Expanding "cone_3d" starting at mouth and widening forward, textured with lava/fire/magma/orange concrete blend.
+9. Symmetry: Build one side (left wing, left horn, left legs), then call { "op": "mirror", "axis": "x", "at": 0 }!
+
+# HOW TO DESIGN 3D TEXT, LOGOS & EMBLEMS
+1. ALWAYS use the dedicated "text_3d" operation whenever text, acronyms, or server names are mentioned (e.g. "NOVA", "SPAWN", "MINE").
+2. Place "text_3d" AFTER all "mirror" operations.
+3. Surround the text with a majestic backdrop: obsidian portal arch ("torus"), glowing halo ("cylinder" with sea_lantern/froglight), or twin gothic spires.
 
 # HOW TO DESIGN MONUMENTAL ARCHITECTURE
 1. Massive Plinths: Tiered podiums using "pyramid" or carved stone plinths.

@@ -139,19 +139,22 @@ function fbm2D(x, z, octaves = 3, seed = 0) {
 class World {
   constructor(seed) {
     this.cells = new Map();
+    this.protectedBlocks = new Set();
     this.seed = seed;
     this.rand = mulberry32(seed);
   }
-  put(x, y, z, spec) {
+  put(x, y, z, spec, isProtected = false) {
     const k = `${x},${y},${z}`;
     if (spec === AIR) {
       this.cells.delete(k);
+      this.protectedBlocks.delete(k);
       return;
     }
     if (!this.cells.has(k) && this.cells.size >= LIM.blocks) {
       throw new BuildError('block limit exceeded');
     }
     this.cells.set(k, { name: spec.name, props: { ...spec.props } });
+    if (isProtected) this.protectedBlocks.add(k);
   }
   get(x, y, z) {
     return this.cells.get(`${x},${y},${z}`);
@@ -693,7 +696,21 @@ const OPS = {
 
   // 13. 3B Blok Yazi / Sunucu Logosu (NOVA, HYPIXEL, VIPER vb. buyuk harfli 3B logo bloklari)
   text_3d(w, p, ctx) {
-    const text = String(p.text ?? 'NOVA').toUpperCase();
+    let rawText = String(p.text ?? 'NOVA').toUpperCase();
+    const text = rawText
+      .replace(/İ/g, 'I')
+      .replace(/ı/g, 'I')
+      .replace(/Ğ/g, 'G')
+      .replace(/ğ/g, 'G')
+      .replace(/Ü/g, 'U')
+      .replace(/ü/g, 'U')
+      .replace(/Ş/g, 'S')
+      .replace(/ş/g, 'S')
+      .replace(/Ö/g, 'O')
+      .replace(/ö/g, 'O')
+      .replace(/Ç/g, 'C')
+      .replace(/ç/g, 'C');
+
     const cx = num(p, 'cx', { optional: true, def: p.x ?? 0 });
     const baseY = num(p, 'y', { optional: true, def: 30 });
     const cz = num(p, 'cz', { optional: true, def: p.z ?? 0 });
@@ -751,10 +768,10 @@ const OPS = {
         let wx, wy, wz;
         if (facing === 'south') { wx = px; wy = actualY; wz = Math.round(cz + d); }
         else if (facing === 'north') { wx = px; wy = actualY; wz = Math.round(cz - d); }
-        else if (facing === 'east') { wx = Math.round(cx + d); wy = actualY; wz = px; }
-        else { wx = Math.round(cx - d); wy = actualY; wz = px; }
+        else if (facing === 'east') { wx = Math.round(cx + d); wy = actualY; wz = Math.round(cz + (px - cx)); }
+        else { wx = Math.round(cx - d); wy = actualY; wz = Math.round(cz - (px - cx)); }
 
-        w.put(wx, wy, wz, resolveBlock(blockSpec, ctx, wx, wy, wz));
+        w.put(wx, wy, wz, resolveBlock(blockSpec, ctx, wx, wy, wz), true);
       }
     };
 
@@ -971,6 +988,8 @@ const OPS = {
     for (let y = b.y1; y <= b.y2; y++) {
       for (let z = b.z1; z <= b.z2; z++) {
         for (let x = b.x1; x <= b.x2; x++) {
+          const k = `${x},${y},${z}`;
+          if (w.protectedBlocks?.has(k)) continue;
           const s = w.get(x, y, z);
           if (s) snap.push([x, y, z, s]);
         }
