@@ -3,11 +3,11 @@ import { z } from 'zod';
 import { SYSTEM_PROMPT, repairPrompt } from './prompt.js';
 import { buildStructure, BuildError } from './builder.js';
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite';
 const GEMINI_TEMP = Number(process.env.GEMINI_TEMPERATURE ?? 0.8);
 const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
-const DEFAULT_PROVIDER = process.env.AI_PROVIDER || (DEEPSEEK_API_KEY ? 'deepseek' : 'gemini');
+const DEFAULT_PROVIDER = process.env.AI_PROVIDER || 'auto';
 
 const MAX_ROUNDS = 3; // 1 üretim + en fazla 2 onarım
 
@@ -79,9 +79,13 @@ async function askDeepSeek(messages) {
 // -------------------------------------------------------------
 // GEMINI API ÇAĞRISI (GoogleGenAI SDK)
 // -------------------------------------------------------------
-const GEMINI_FALLBACKS = [GEMINI_MODEL, 'gemini-3.7-flash', 'gemini-3.5-flash', 'gemini-flash-latest'].filter(
-  (v, i, a) => a.indexOf(v) === i
-);
+const GEMINI_FALLBACKS = [
+  GEMINI_MODEL,
+  'gemini-3.1-flash-lite',
+  'gemini-3.5-flash-lite',
+  'gemini-flash-lite-latest',
+  'gemini-3.8-flash',
+].filter((v, i, a) => a.indexOf(v) === i);
 
 async function askGemini(promptText) {
   if (!gemini) {
@@ -133,7 +137,15 @@ async function askAI(promptText, provider = DEFAULT_PROVIDER) {
   ];
 
   if (provider === 'deepseek') {
-    return await askDeepSeek(deepseekMessages);
+    try {
+      return await askDeepSeek(deepseekMessages);
+    } catch (err) {
+      if (gemini) {
+        console.warn(`[AI-Router] DeepSeek hatası (${err.message}). Gemini'ye otomatik geçiliyor...`);
+        return await askGemini(promptText);
+      }
+      throw err;
+    }
   }
 
   if (provider === 'gemini') {

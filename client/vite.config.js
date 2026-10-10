@@ -5,5 +5,12 @@ import tailwindcss from '@tailwindcss/vite';
 // Gelistirmede /api isteklerini Express sunucusuna yonlendirir (CORS gerekmez).
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  server: { proxy: { '/api': 'http://localhost:8787' } },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8787',
+        changeOrigin: true,
+      },
+    },
+  },
 });
