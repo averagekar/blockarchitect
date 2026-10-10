@@ -368,10 +368,52 @@ const FONT_5X7 = {
   '6': [' ### ','#    ','#    ','#### ','#   #','#   #',' ### '],
   '7': ['#####','    #','   # ','  #  ','  #  ','  #  ','  #  '],
   '8': [' ### ','#   #','#   #',' ### ','#   #','#   #',' ### '],
-  '9': [' ### ','#   #','#   #',' ####','    #','    #',' ### '],
-  '-': ['     ','     ','     ',' ### ','     ','     ','     '],
-  '!': ['  #  ','  #  ','  #  ','  #  ','  #  ','     ','  #  '],
-  '.': ['     ','     ','     ','     ','     ','     ','  #  ']
+  '9': [' ### ','#   #','#   #',' ####','    #','    #',' ### ']
+};
+
+// 7x9 Heroic Architectural Voxel Display Font (A-Z, 0-9)
+// Gercek sunucu logolari, Hypixel tarzi anitsal harfler, keskin diyagonaller ve kemerli kavisler
+const FONT_HEROIC_7X9 = {
+  ' ': ['       ','       ','       ','       ','       ','       ','       ','       ','       '],
+  'A': ['  ###  ',' #   # ',' #   # ','#     #','#######','#     #','#     #','#     #','#     #'],
+  'B': ['###### ','#     #','#     #','###### ','#     #','#     #','#     #','#     #','###### '],
+  'C': [' ##### ','#     #','#      ','#      ','#      ','#      ','#      ','#     #',' ##### '],
+  'D': ['###### ','#     #','#     #','#     #','#     #','#     #','#     #','#     #','###### '],
+  'E': ['#######','#      ','#      ','#####  ','#      ','#      ','#      ','#      ','#######'],
+  'F': ['#######','#      ','#      ','#####  ','#      ','#      ','#      ','#      ','#      '],
+  'G': [' ##### ','#     #','#      ','#      ','#  ####','#     #','#     #','#     #',' ##### '],
+  'H': ['#     #','#     #','#     #','#######','#     #','#     #','#     #','#     #','#     #'],
+  'I': ['#######','   #   ','   #   ','   #   ','   #   ','   #   ','   #   ','   #   ','#######'],
+  'J': ['  #####','     # ','     # ','     # ','     # ','     # ','#    # ','#    # ',' ####  '],
+  'K': ['#    # ','#   #  ','#  #   ','###    ','#  #   ','#   #  ','#    # ','#    # ','#     #'],
+  'L': ['#      ','#      ','#      ','#      ','#      ','#      ','#      ','#      ','#######'],
+  'M': ['#     #','##   ##','# # # #','#  #  #','#     #','#     #','#     #','#     #','#     #'],
+  'N': ['##    #','###   #','# ##  #','#  ## #','#   ###','#    ##','#     #','#     #','#     #'],
+  'O': [' ##### ','#     #','#     #','#     #','#     #','#     #','#     #','#     #',' ##### '],
+  'P': ['###### ','#     #','#     #','###### ','#      ','#      ','#      ','#      ','#      '],
+  'Q': [' ##### ','#     #','#     #','#     #','#     #','#   # #','#    ##',' ##### ','      #'],
+  'R': ['###### ','#     #','#     #','###### ','#   #  ','#    # ','#    # ','#     #','#     #'],
+  'S': [' ##### ','#     #','#      ',' ####  ','     # ','      #','      #','#     #',' ##### '],
+  'T': ['#######','   #   ','   #   ','   #   ','   #   ','   #   ','   #   ','   #   ','   #   '],
+  'U': ['#     #','#     #','#     #','#     #','#     #','#     #','#     #','#     #',' ##### '],
+  'V': ['#     #','#     #','#     #',' #   # ',' #   # ','  # #  ','  # #  ','  # #  ','   #   '],
+  'W': ['#     #','#     #','#     #','#  #  #','# # # #','# # # #','##   ##','#     #','#     #'],
+  'X': ['#     #',' #   # ','  # #  ','   #   ','  # #  ',' #   # ','#     #','#     #','#     #'],
+  'Y': ['#     #',' #   # ','  # #  ','   #   ','   #   ','   #   ','   #   ','   #   ','   #   '],
+  'Z': ['#######','     # ','    #  ','   #   ','  #    ',' #     ','#      ','#      ','#######'],
+  '0': [' ##### ','#    ##','#   # #','#  #  #','# #   #','##    #','#     #','#     #',' ##### '],
+  '1': ['   ##  ','  ###  ','   ##  ','   ##  ','   ##  ','   ##  ','   ##  ','   ##  ',' ######'],
+  '2': [' ##### ','#     #','      #','   ### ','  #    ',' #     ','#      ','#      ','#######'],
+  '3': ['###### ','      #','      #',' ##### ','      #','      #','      #','      #','###### '],
+  '4': ['#     #','#     #','#     #','#######','      #','      #','      #','      #','      #'],
+  '5': ['#######','#      ','#      ','###### ','      #','      #','      #','      #','###### '],
+  '6': [' ##### ','#      ','#      ','###### ','#     #','#     #','#     #','#     #',' ##### '],
+  '7': ['#######','     # ','    #  ','   #   ','   #   ','  #    ','  #    ',' #     ',' #     '],
+  '8': [' ##### ','#     #','#     #',' ##### ','#     #','#     #','#     #','#     #',' ##### '],
+  '9': [' ##### ','#     #','#     #','#     #',' ######','      #','      #','      #',' ##### '],
+  '-': ['       ','       ','       ','       ',' ##### ','       ','       ','       ','       '],
+  '!': ['  ###  ','  ###  ','  ###  ','  ###  ','   #   ','   #   ','       ','  ###  ','  ###  '],
+  '.': ['       ','       ','       ','       ','       ','       ','       ','  ###  ','  ###  ']
 };
 
 // ---------- OPERASYONLAR ----------
@@ -720,23 +762,28 @@ const OPS = {
     const outline = p.outline ?? p.border_block ?? p.outline_block;
     const facing = p.facing || 'south';
 
-    const letterWidth = 5 * scale;
-    const letterHeight = 7 * scale;
-    const spacing = 1 * scale;
+    const fontMode = p.font === '5x7' ? '5x7' : 'heroic';
+    const fontTable = fontMode === '5x7' ? FONT_5X7 : FONT_HEROIC_7X9;
+    const fontCols = fontMode === '5x7' ? 5 : 7;
+    const fontRows = fontMode === '5x7' ? 7 : 9;
+
+    const letterWidth = fontCols * scale;
+    const letterHeight = fontRows * scale;
+    const spacing = Math.max(1, Math.round(1.5 * scale));
     const totalW = text.length * letterWidth + (text.length - 1) * spacing;
     const startX = Math.round(cx - totalW / 2);
 
     const pixels = new Set();
     let currX = startX;
     for (const char of text) {
-      const bitmap = FONT_5X7[char] || FONT_5X7[' '];
-      for (let r = 0; r < 7; r++) {
-        for (let c = 0; c < 5; c++) {
-          if (bitmap[r][c] === '#') {
+      const bitmap = fontTable[char] || fontTable[' '];
+      for (let r = 0; r < fontRows; r++) {
+        for (let c = 0; c < fontCols; c++) {
+          if (bitmap[r]?.[c] === '#') {
             for (let sr = 0; sr < scale; sr++) {
               for (let sc = 0; sc < scale; sc++) {
                 const px = currX + c * scale + sc;
-                const py = (6 - r) * scale + sr;
+                const py = (fontRows - 1 - r) * scale + sr;
                 pixels.add(`${px},${py}`);
               }
             }
@@ -775,11 +822,22 @@ const OPS = {
       }
     };
 
+    // 1. On yuz (Face)
     for (const key of pixels) {
       const [px, py] = key.split(',').map(Number);
-      place2D(px, py, p.block, 0, depth - 1);
+      place2D(px, py, p.block, 0, 0);
     }
 
+    // 2. Yan/Arka Derinlik (Extruded Depth)
+    const depthBlock = p.depth_block || p.depthBlock || p.block;
+    if (depth > 1) {
+      for (const key of pixels) {
+        const [px, py] = key.split(',').map(Number);
+        place2D(px, py, depthBlock, 1, depth - 1);
+      }
+    }
+
+    // 3. Dis Kontur (Outline Rim)
     if (outline) {
       for (const key of outlinePixels) {
         const [px, py] = key.split(',').map(Number);
@@ -788,6 +846,29 @@ const OPS = {
       for (const key of pixels) {
         const [px, py] = key.split(',').map(Number);
         place2D(px, py, outline, -1, -1);
+      }
+    }
+
+    // 4. Otomatik Anitsal Kaide (Pedestal Stand - Asla havada asili kalmaz)
+    if (p.pedestal !== false && p.stand !== false && baseY > 2) {
+      const pedBlock = p.pedestal_block || outline || 'minecraft:polished_blackstone_bricks';
+      const trimBlock = p.block || 'minecraft:gold_block';
+      const pzStart = Math.min(cz - 2, cz + depth + 1);
+      const pzEnd = Math.max(cz - 2, cz + depth + 1);
+
+      // Kademe 1 (Ust Ince Trim)
+      for (let px = startX - 2; px <= startX + totalW + 1; px++) {
+        for (let pz = pzStart; pz <= pzEnd; pz++) {
+          w.put(px, Math.round(baseY - 1), pz, resolveBlock(trimBlock, ctx, px, Math.round(baseY - 1), pz), true);
+        }
+      }
+      // Kademe 2 (Alt Saglam Govde)
+      for (let py = Math.max(0, Math.round(baseY - 4)); py <= Math.round(baseY - 2); py++) {
+        for (let px = startX - 3; px <= startX + totalW + 2; px++) {
+          for (let pz = pzStart - 1; pz <= pzEnd + 1; pz++) {
+            w.put(px, py, pz, resolveBlock(pedBlock, ctx, px, py, pz), true);
+          }
+        }
       }
     }
   },

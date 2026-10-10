@@ -21,7 +21,8 @@ export const TRANSLATIONS = {
     brand_tagline: 'Yeni Nesil Parametrik 3D Voxel CAD Stüdyosu & Minecraft Mimarlık Motoru',
     brand_badge_parametric: 'v2.0 Parametrik',
     brand_status_live: 'Canlı Motor Hazır',
-    download_schem: '.schem İndir',
+    download_schem: '1.21+ (.schem)',
+    download_schematic_legacy: '1.8.9 (.schematic)',
     compiling: 'Derleniyor...',
 
     // Model Seçici
@@ -59,7 +60,8 @@ export const TRANSLATIONS = {
 
     // Şablonlar Sekmesi
     blueprints_header: 'Öne Çıkan Mimari Şablonlar',
-    blueprints_desc: 'Tek tıkla konsola aktarılmaya hazır profesyonel yapay zeka yönergeleri.',
+    blueprints_desc: 'Tek tıkla konsola aktarılmaya hazır profesyonel yapay zeka yönergeleri veya anında 0ms master projeler.',
+    blueprint_instant_btn: '⚡ Anında Yükle (Master)',
     blueprint_use_btn: 'Yönergeyi Konsola Aktar',
 
     // Sağ Panel - Başlık & Sekmeler
@@ -160,6 +162,7 @@ export const TRANSLATIONS = {
     toast_compile_success: '3B Mimari Başarıyla Derlendi!',
     toast_compile_error: 'Mimari Üretilemedi',
     toast_download_schem: 'Sponge Schematic (.schem) Dosyası İndiriliyor',
+    toast_download_schematic_legacy: '1.8.9 Klasik .schematic Dosyası İndirildi!',
   },
 
   en: {
@@ -168,7 +171,8 @@ export const TRANSLATIONS = {
     brand_tagline: 'Next-Gen Parametric 3D Voxel CAD Studio & Minecraft Architecture Engine',
     brand_badge_parametric: 'v2.0 Parametric',
     brand_status_live: 'Live Engine Ready',
-    download_schem: 'Download .schem',
+    download_schem: '1.21+ (.schem)',
+    download_schematic_legacy: '1.8.9 (.schematic)',
     compiling: 'Compiling...',
 
     // Model Selector
@@ -206,7 +210,8 @@ export const TRANSLATIONS = {
 
     // Blueprints Tab
     blueprints_header: 'Curated Architectural Blueprints',
-    blueprints_desc: 'Professional AI prompts ready to inject into the console with a single click.',
+    blueprints_desc: 'Professional AI prompts ready to inject into the console or instant 0ms pre-compiled master structures.',
+    blueprint_instant_btn: '⚡ Instant Load (Master)',
     blueprint_use_btn: 'Load Directive into Console',
 
     // Right Panel - Title & Tabs
@@ -307,6 +312,7 @@ export const TRANSLATIONS = {
     toast_compile_success: '3D Architecture Compiled Successfully!',
     toast_compile_error: 'Failed to Compile Architecture',
     toast_download_schem: 'Downloading Sponge Schematic (.schem)...',
+    toast_download_schematic_legacy: '1.8.9 Classic .schematic Downloaded!',
   },
 };
 
@@ -315,9 +321,10 @@ export const BLUEPRINTS_I18N = {
   tr: [
     {
       id: 'nova_hub',
+      presetId: 'nova_citadel',
       category: 'pvp',
       title: 'Hardcore PvP Hub & 3D "NOVA" Logosu',
-      badge: 'Spawn Lobi',
+      badge: 'Master Blueprint',
       tags: ['180×180', '3D Logo', 'İkiz Ejderha', 'Volkanik Dağ'],
       desc: '180×180 tabanlı volkanik kale, gökyüzünde 3B bloklarla yazılı devasa "NOVA" logosu, iki ejderha heykeli ve engelsiz PvP meydanı.',
       prompt:
@@ -325,9 +332,10 @@ export const BLUEPRINTS_I18N = {
     },
     {
       id: 'blue_dragon',
+      presetId: 'infernal_dragon',
       category: 'organic',
-      title: 'Devasa Mavi Ejderha & Alev Konisi',
-      badge: 'Heykel',
+      title: 'Devasa Infernal Ejderha & Alev Konisi',
+      badge: 'Master Blueprint',
       tags: ['70 Blok', 'Alev Konisi', 'Prizmarin', 'Kemik Dişler'],
       desc: '70 blok uzunluk, 60 kanat açıklığı, S-biçimli boyun, açık çene kemik dişler, prizmarin boynuzlar ve lav püskürten alev konisi.',
       prompt:
@@ -358,9 +366,10 @@ export const BLUEPRINTS_I18N = {
   en: [
     {
       id: 'nova_hub',
+      presetId: 'nova_citadel',
       category: 'pvp',
       title: 'Hardcore PvP Hub & 3D "NOVA" Logo',
-      badge: 'Spawn Citadel',
+      badge: 'Master Blueprint',
       tags: ['180×180', '3D Logo', 'Twin Dragons', 'Volcanic Peaks'],
       desc: '180×180 volcanic citadel, colossal 3D "NOVA" block lettering across the sky, twin dragon sculptures, and smooth obstacle-free PvP arena.',
       prompt:
@@ -368,9 +377,10 @@ export const BLUEPRINTS_I18N = {
     },
     {
       id: 'blue_dragon',
+      presetId: 'infernal_dragon',
       category: 'organic',
-      title: 'Colossal Blue Dragon & Flame Plume',
-      badge: 'Sculpture',
+      title: 'Colossal Infernal Dragon & Flame Plume',
+      badge: 'Master Blueprint',
       tags: ['70 Blocks', 'Flame Cone', 'Prismarine', 'Bone Teeth'],
       desc: '70-block length, 60 wingspan, S-curved spine, bone teeth, prismarine horns, and breathing an expansive conical flame plume.',
       prompt:

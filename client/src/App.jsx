@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster, toast } from 'sonner';
 import confetti from 'canvas-confetti';
 import VoxelViewer from './components/VoxelViewer.jsx';
-import { generateStructure, downloadSchem } from './lib/api.js';
+import { generateStructure, downloadSchem, downloadLegacySchem, fetchPreset } from './lib/api.js';
 import { cleanId, colorFor } from './lib/blockColors.js';
 import { exportStructureToOBJ } from './lib/objExporter.js';
 import {
@@ -41,6 +41,7 @@ import {
   PackageCheck,
   RotateCcw,
   RefreshCw,
+  Zap,
 } from 'lucide-react';
 
 const MODEL_OPTIONS = [
@@ -104,6 +105,7 @@ export default function App() {
 
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [downloadingLegacy, setDownloadingLegacy] = useState(false);
   const [error, setError] = useState('');
   const [copiedCmd, setCopiedCmd] = useState(false);
   const [copiedDiscord, setCopiedDiscord] = useState(false);
@@ -224,6 +226,48 @@ export default function App() {
       toast.error('Download Error', { description: err.message });
     } finally {
       setDownloading(false);
+    }
+  }
+
+  async function handleDownloadLegacy() {
+    if (!effectiveStructure) return;
+    setDownloadingLegacy(true);
+    setError('');
+    try {
+      await downloadLegacySchem(effectiveStructure);
+      toast.success(t('toast_download_schematic_legacy'), {
+        description: `${effectiveStructure.structure_name}_1.8.9.schematic (MCEdit / WorldEdit 6)`,
+      });
+    } catch (err) {
+      setError(err.message);
+      toast.error('Legacy Download Error', { description: err.message });
+    } finally {
+      setDownloadingLegacy(false);
+    }
+  }
+
+  async function handleInstantPreset(presetId) {
+    setLoading(true);
+    setError('');
+    setPaletteOverrides({});
+    try {
+      const res = await fetchPreset(presetId);
+      setStructure(res);
+      setRightOpen(true);
+      toast.success(t('toast_compile_success'), {
+        description: `⚡ ${res.structure_name} • ${res.blocks.length.toLocaleString(lang === 'tr' ? 'tr-TR' : 'en-US')} ${t('metric_voxels')}`,
+      });
+      confetti({
+        particleCount: 90,
+        spread: 75,
+        origin: { y: 0.8 },
+        colors: ['#f59e0b', '#38bdf8', '#10b981', '#ec4899'],
+      });
+    } catch (err) {
+      setError(err.message);
+      toast.error('Preset Load Error', { description: err.message });
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -567,11 +611,24 @@ export default function App() {
                 type="button"
                 onClick={handleDownload}
                 disabled={downloading}
-                title="WorldEdit .schem"
-                className="cursor-pointer flex h-7 items-center gap-1.5 rounded-lg bg-amber-cad/15 px-2.5 text-[11px] text-amber-cad border border-amber-cad/30 hover:bg-amber-cad/25 transition-colors disabled:opacity-40 shadow-sm"
+                title="WorldEdit 7+ (Minecraft 1.13 - 1.21+ Sponge v2)"
+                className="cursor-pointer flex h-7 items-center gap-1.5 rounded-lg bg-amber-cad/15 px-2.5 text-[11px] text-amber-cad border border-amber-cad/30 hover:bg-amber-cad/25 transition-colors disabled:opacity-40 shadow-sm font-medium"
               >
                 <Download className="h-3 w-3" />
                 <span>{downloading ? t('compiling') : t('download_schem')}</span>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                type="button"
+                onClick={handleDownloadLegacy}
+                disabled={downloadingLegacy}
+                title="WorldEdit 6 / MCEdit (Minecraft 1.8.9 PvP Sunucuları)"
+                className="cursor-pointer flex h-7 items-center gap-1.5 rounded-lg bg-emerald-500/15 px-2.5 text-[11px] text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25 transition-colors disabled:opacity-40 shadow-sm font-medium"
+              >
+                <Download className="h-3 w-3" />
+                <span>{downloadingLegacy ? t('compiling') : t('download_schematic_legacy')}</span>
               </motion.button>
             </>
           )}
@@ -882,18 +939,30 @@ export default function App() {
 
                           <p className="text-[11px] text-ink-dim leading-relaxed">{bp.desc}</p>
 
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setPrompt(bp.prompt);
-                              setLeftTab('prompt');
-                              toast.success(`"${bp.title}" injected into console!`);
-                            }}
-                            className="cursor-pointer w-full flex items-center justify-center gap-1.5 rounded-lg bg-base py-1.5 text-[10px] text-ink border border-line hover:border-amber-cad/50 hover:text-amber-cad transition-colors font-semibold"
-                          >
-                            <Play className="h-3 w-3 fill-current" />
-                            <span>{t('blueprint_use_btn')}</span>
-                          </button>
+                          <div className="flex items-center gap-1.5 pt-1">
+                            {bp.presetId && (
+                              <button
+                                type="button"
+                                onClick={() => handleInstantPreset(bp.presetId)}
+                                className="cursor-pointer flex-1 flex items-center justify-center gap-1 rounded-lg bg-amber-cad py-1.5 text-[10px] text-base hover:bg-amber-400 transition-colors font-bold shadow-sm"
+                              >
+                                <Zap className="h-3 w-3 fill-current" />
+                                <span>{t('blueprint_instant_btn')}</span>
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPrompt(bp.prompt);
+                                setLeftTab('prompt');
+                                toast.success(`"${bp.title}" injected into console!`);
+                              }}
+                              className={`cursor-pointer ${bp.presetId ? 'flex-1' : 'w-full'} flex items-center justify-center gap-1.5 rounded-lg bg-base py-1.5 text-[10px] text-ink border border-line hover:border-amber-cad/50 hover:text-amber-cad transition-colors font-semibold`}
+                            >
+                              <Play className="h-3 w-3 fill-current" />
+                              <span>{t('blueprint_use_btn')}</span>
+                            </button>
+                          </div>
                         </motion.div>
                       ))}
                     </div>
@@ -1360,7 +1429,7 @@ export default function App() {
                           )}
                         </motion.button>
 
-                        <div className="grid grid-cols-2 gap-2 pt-1">
+                        <div className="grid grid-cols-2 gap-2 pt-1 font-mono text-[11px]">
                           <motion.button
                             whileHover={{ scale: 1.01 }}
                             whileTap={{ scale: 0.98 }}
@@ -1370,7 +1439,19 @@ export default function App() {
                             className="cursor-pointer flex items-center justify-center gap-1.5 rounded-xl bg-amber-cad py-2.5 font-bold text-base hover:bg-amber-400 transition-colors disabled:opacity-40 shadow-lg shadow-amber-cad/10"
                           >
                             <Download className="h-3.5 w-3.5" />
-                            <span>.schem (Sponge v2)</span>
+                            <span>1.21+ .schem</span>
+                          </motion.button>
+
+                          <motion.button
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.98 }}
+                            type="button"
+                            onClick={handleDownloadLegacy}
+                            disabled={downloadingLegacy}
+                            className="cursor-pointer flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/15 py-2.5 font-bold text-emerald-400 hover:bg-emerald-500/25 transition-colors disabled:opacity-40 shadow-sm"
+                          >
+                            <Download className="h-3.5 w-3.5" />
+                            <span>1.8.9 .schematic</span>
                           </motion.button>
 
                           <motion.button
@@ -1381,7 +1462,18 @@ export default function App() {
                             className="cursor-pointer flex items-center justify-center gap-1.5 rounded-xl border border-cyan-cad/40 bg-cyan-cad/10 py-2.5 font-bold text-cyan-cad hover:bg-cyan-cad/20 transition-colors shadow-sm"
                           >
                             <Box className="h-3.5 w-3.5" />
-                            <span>3D .OBJ (Blender)</span>
+                            <span>3D .OBJ</span>
+                          </motion.button>
+
+                          <motion.button
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.98 }}
+                            type="button"
+                            onClick={handleDownloadMcfunction}
+                            className="cursor-pointer flex items-center justify-center gap-1.5 rounded-xl border border-line bg-surface py-2.5 font-bold text-ink-muted hover:text-ink hover:border-amber-cad/30 transition-colors shadow-sm"
+                          >
+                            <FileCode className="h-3.5 w-3.5" />
+                            <span>.mcfunction</span>
                           </motion.button>
                         </div>
                       </div>

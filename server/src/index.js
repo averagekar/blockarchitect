@@ -9,6 +9,9 @@ import { z } from 'zod';
 import { generateStructure } from './ai.js';
 import { normalizeStructure } from './validate.js';
 import { structureToSchem } from './schem.js';
+import { structureToLegacySchematic } from './legacySchematic.js';
+import { MASTER_PRESETS } from './presets.js';
+import { buildStructure } from './builder.js';
 
 if (!process.env.GEMINI_API_KEY && !process.env.DEEPSEEK_API_KEY) {
   console.error('Ne GEMINI_API_KEY ne de DEEPSEEK_API_KEY tanimli degil (.env dosyasini kontrol edin).');
@@ -62,6 +65,34 @@ app.post('/api/schem', (req, res) => {
     res.send(buffer);
   } catch (err) {
     res.status(400).json({ error: `Gecersiz yapi: ${err.message}` });
+  }
+});
+
+// POST /api/schematic-legacy  { ...yapi JSON }  ->  1.8.9 Klasik .schematic dosyasi (WorldEdit 6)
+app.post('/api/schematic-legacy', (req, res) => {
+  try {
+    const structure = normalizeStructure(req.body);
+    const buffer = structureToLegacySchematic(structure);
+    const safeName =
+      structure.structure_name.replace(/[^a-z0-9_-]+/gi, '_').slice(0, 60) || 'structure_1_8';
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Content-Disposition', `attachment; filename="${safeName}.schematic"`);
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+    res.send(buffer);
+  } catch (err) {
+    res.status(400).json({ error: `1.8.9 ceviri hatasi: ${err.message}` });
+  }
+});
+
+// GET /api/presets/:id  ->  Hazir master preset yapisi (0ms beklemesiz derleme)
+app.get('/api/presets/:id', (req, res) => {
+  const plan = MASTER_PRESETS[req.params.id];
+  if (!plan) return res.status(404).json({ error: 'Preset bulunamadi.' });
+  try {
+    const { structure, warnings } = buildStructure(plan);
+    res.json({ ...structure, meta: { warnings, rounds: 1, provider: 'master_preset' } });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
