@@ -2,6 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 import { z } from 'zod';
 import { generateStructure } from './ai.js';
 import { normalizeStructure } from './validate.js';
@@ -13,7 +16,7 @@ if (!process.env.GEMINI_API_KEY && !process.env.DEEPSEEK_API_KEY) {
 }
 
 const app = express();
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: (process.env.CORS_ORIGIN || 'http://localhost:5173').split(',') }));
 app.use(express.json({ limit: '30mb' }));
 
@@ -68,6 +71,19 @@ app.get('/api/health', (_req, res) => res.json({
   hasDeepSeek: Boolean(process.env.DEEPSEEK_API_KEY),
   defaultProvider: process.env.AI_PROVIDER || 'auto'
 }));
+
+// Serves the client SPA in production or Docker when client/dist exists
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const clientDistPath = path.resolve(__dirname, '../../client/dist');
+
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
 
 const port = Number(process.env.PORT || 8787);
 app.listen(port, () => console.log(`BlockArchitect API http://localhost:${port}`));

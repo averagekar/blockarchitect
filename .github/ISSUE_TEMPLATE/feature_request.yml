@@ -1,0 +1,23 @@
+name: 💡 Feature Request / Geometric Operator
+description: Suggest a new architectural primitive, UI feature, or server export format.
+title: "[FEATURE]: "
+labels: ["enhancement", "proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea for a new geometric generator (e.g. fractal roofs, spiral stairs) or UI improvement?
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature Description
+      description: Describe the feature, why it is needed, and how it improves Minecraft building.
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution or Implementation
+      description: Any ideas on how the builder or UI should implement this?
+    validations:
+      required: false

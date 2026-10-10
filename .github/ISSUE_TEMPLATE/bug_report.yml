@@ -1,0 +1,43 @@
+name: 🐛 Bug Report
+description: Report an issue, rendering glitch, or schematic export problem.
+title: "[BUG]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report an issue with **BlockArchitect AI**!
+  - type: input
+    id: prompt
+    attributes:
+      label: Architectural Prompt
+      description: What prompt were you running when the issue occurred?
+      placeholder: e.g. "Hardcore PvP Network Spawn Citadel..."
+    validations:
+      required: false
+  - type: dropdown
+    id: provider
+    attributes:
+      label: AI Engine
+      description: Which model provider was active?
+      options:
+        - DeepSeek-V3
+        - Gemini 3.8 Flash
+        - Auto Router
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the Bug
+      description: What went wrong? What did you expect to happen instead?
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment Info
+      description: OS version, browser, and Node.js version.
+      placeholder: Windows 11, Chrome 128, Node.js 22.1.0
+    validations:
+      required: false
