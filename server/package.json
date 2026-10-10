@@ -1,0 +1,20 @@
+{
+  "name": "blockarchitect-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --env-file=.env src/index.js",
+    "start": "node --env-file=.env src/index.js"
+  },
+  "engines": { "node": ">=20.6" },
+  "dependencies": {
+    "@google/genai": "^1.20.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^8.0.0",
+    "prismarine-nbt": "^2.5.0",
+    "zod": "^3.23.8"
+  }
+}

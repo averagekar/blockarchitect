@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@theme {
+  --color-base: #07080a;
+  --color-panel: #0d0e13;
+  --color-panel-translucent: rgba(13, 14, 19, 0.88);
+  --color-surface: #13141a;
+  --color-surface-hover: #1a1c24;
+  --color-surface-active: #222530;
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-bright: rgba(255, 255, 255, 0.16);
+  --color-line-focus: rgba(255, 255, 255, 0.3);
+
+  --color-ink: #f8fafc;
+  --color-ink-muted: #94a3b8;
+  --color-ink-dim: #64748b;
+
+  /* Industrial CAD & Minecraft Engineering Accents */
+  --color-amber-cad: #f59e0b;
+  --color-amber-glow: rgba(245, 158, 11, 0.25);
+  --color-cyan-cad: #38bdf8;
+  --color-emerald-cad: #10b981;
+  --color-red-cad: #ef4444;
+
+  --font-display: "Bricolage Grotesque", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  user-select: none;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-base);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* CAD Technical Grid Background */
+.bg-cad-grid {
+  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
+
+.bg-cad-dots {
+  background-size: 16px 16px;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0);
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: var(--color-panel-translucent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-line);
+}
+
+.glass-panel-hover:hover {
+  background: rgba(22, 24, 32, 0.92);
+  border-color: var(--color-line-bright);
+}
+
+/* Precision Scrollbars */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 1px solid var(--color-amber-cad);
+  outline-offset: -1px;
+}
