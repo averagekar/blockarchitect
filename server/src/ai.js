@@ -1,6 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import { z } from 'zod';
-import { SYSTEM_PROMPT, repairPrompt } from './prompt.js';
+import { getSystemPrompt, repairPrompt } from './prompt.js';
 import { buildStructure, BuildError } from './builder.js';
 
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite';
@@ -90,17 +90,18 @@ const GEMINI_FALLBACKS = [
   'gemini-flash-lite-latest',
 ].filter((v, i, a) => a.indexOf(v) === i);
 
-async function askGemini(promptText) {
+async function askGemini(promptText, version = '1.21') {
   if (!gemini) {
     throw new Error('GEMINI_API_KEY sunucu .env dosyasında tanımlı değil.');
   }
 
+  const systemInstruction = getSystemPrompt(version);
   let lastErr = null;
   for (const modelName of GEMINI_FALLBACKS) {
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
         const config = {
-          systemInstruction: SYSTEM_PROMPT,
+          systemInstruction,
           temperature: GEMINI_TEMP,
           responseMimeType: 'application/json',
           maxOutputTokens: 32768,
@@ -140,7 +141,7 @@ async function askGemini(promptText) {
               model: modelName,
               contents: promptText,
               config: {
-                systemInstruction: SYSTEM_PROMPT,
+                systemInstruction,
                 temperature: GEMINI_TEMP,
                 responseMimeType: 'application/json',
                 maxOutputTokens: 32768,
@@ -162,9 +163,10 @@ async function askGemini(promptText) {
 // -------------------------------------------------------------
 // ÇOKLU MODEL YÖNLENDİRİCİSİ (Provider Router & Failover)
 // -------------------------------------------------------------
-async function askAI(promptText, provider = DEFAULT_PROVIDER) {
+async function askAI(promptText, provider = DEFAULT_PROVIDER, version = '1.21') {
+  const systemPrompt = getSystemPrompt(version);
   const deepseekMessages = [
-    { role: 'system', content: SYSTEM_PROMPT },
+    { role: 'system', content: systemPrompt },
     { role: 'user', content: promptText },
   ];
 
@@ -174,14 +176,14 @@ async function askAI(promptText, provider = DEFAULT_PROVIDER) {
     } catch (err) {
       if (gemini) {
         console.warn(`[AI-Router] DeepSeek hatası (${err.message}). Gemini'ye otomatik geçiliyor...`);
-        return await askGemini(promptText);
+        return await askGemini(promptText, version);
       }
       throw err;
     }
   }
 
   if (provider === 'gemini') {
-    return await askGemini(promptText);
+    return await askGemini(promptText, version);
   }
 
   // 'auto' modunda: Öncelikli olarak DeepSeek anahtarı varsa DeepSeek dene, aksi halde Gemini
@@ -191,13 +193,13 @@ async function askAI(promptText, provider = DEFAULT_PROVIDER) {
     } catch (err) {
       console.warn(`[AI-Router] DeepSeek hatası: ${err.message}. Gemini deneniyor...`);
       if (gemini) {
-        return await askGemini(promptText);
+        return await askGemini(promptText, version);
       }
       throw err;
     }
   }
 
-  return await askGemini(promptText);
+  return await askGemini(promptText, version);
 }
 
 /**
@@ -205,9 +207,9 @@ async function askAI(promptText, provider = DEFAULT_PROVIDER) {
  * 2) builder 3B matrise çevirir ve doğrular
  * 3) Gerekirse onarım turları (repairPrompt) ile düzeltir.
  */
-export async function generateStructure(userPrompt, requestedProvider) {
+export async function generateStructure(userPrompt, requestedProvider, version = '1.21') {
   const provider = requestedProvider || DEFAULT_PROVIDER;
-  const request = `Build request:\n${userPrompt}`;
+  const request = `Target Minecraft Version: ${version}\nBuild request:\n${userPrompt}`;
   let best = null,
     lastPlan = null,
     feedback = null,
@@ -218,7 +220,7 @@ export async function generateStructure(userPrompt, requestedProvider) {
     let plan;
     const currentPrompt = round === 0 ? request : repairPrompt(request, lastPlan, feedback);
     try {
-      plan = await askAI(currentPrompt, provider);
+      plan = await askAI(currentPrompt, provider, version);
     } catch (err) {
       feedback = [`Your last answer was not a valid plan JSON: ${String(err.message).slice(0, 300)}`];
       // Eğer doğrudan API kotası/bakiye hatasıysa döngüyü boşuna bekletmeyip hemen kullanıcıya fırlat
@@ -248,5 +250,5 @@ export async function generateStructure(userPrompt, requestedProvider) {
 
   if (!best) throw new Error(`Model geçerli bir plan üretemedi: ${feedback?.[0]}`);
   const { structure, warnings } = best.result;
-  return { ...structure, meta: { warnings, rounds, provider } };
+  return { ...structure, meta: { warnings, rounds, provider, version } };
 }

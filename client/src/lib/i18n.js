@@ -40,7 +40,14 @@ export const TRANSLATIONS = {
     prompt_placeholder: 'Örn: 180×180 tabanlı volkanik kale, gökyüzünde 3D bloklarla yazılı devasa "NOVA" logosu, iki kükreyen ejderha heykeli ve engelsiz PvP meydanı...',
     quick_snippets: 'Hızlı Modüler Kod Parçacıkları',
 
-    // CAD Parametreleri
+    // Sürüm ve CAD Parametreleri
+    target_mc_version: 'Hedef Minecraft Sürümü',
+    version_1_21: '1.21+ Modern',
+    version_1_8: '1.8.9 Legacy PvP',
+    version_1_21_desc: 'Deepslate, Blackstone, Beton, Kurbağa Işığı ve Modern Voksel Mimarisi (WorldEdit 7+ / Axiom).',
+    version_1_8_desc: 'Saf 1.8.9 Blokları: Renkli Killer, İnce Camlar, Ağlar (WorldEdit 6 / Hypixel PvP Sunucuları).',
+    zero_lava_badge: '🛡️ Sıfır Lav Kuralı',
+    zero_lava_desc: 'Alevler lav yerine katmanlı renkli ince camlar ve duman ağları ile inşa edilir; sunucuda lag veya yangın yapmaz.',
     cad_controls_title: 'CAD Parametre Kontrolleri',
     max_volume_span: 'Maksimum Hacim Açıklığı',
     mirror_symmetry: 'Ayna Simetrisi',
@@ -190,7 +197,14 @@ export const TRANSLATIONS = {
     prompt_placeholder: 'E.g.: 180×180 volcanic fortress breathing fire, monumental 3D block lettering reading "NOVA", twin roaring dragons, and seamless PvP arena...',
     quick_snippets: 'Quick Modular Snippets',
 
-    // CAD Controls
+    // Version and CAD Controls
+    target_mc_version: 'Target Minecraft Version',
+    version_1_21: '1.21+ Modern',
+    version_1_8: '1.8.9 Legacy PvP',
+    version_1_21_desc: 'Deepslate, Blackstone, Concrete, Froglights, and Modern Voxel Architecture (WorldEdit 7+ / Axiom).',
+    version_1_8_desc: 'Native 1.8.9 Blocks: Stained Clay, Glass Panes, Cobwebs (WorldEdit 6 / Hypixel PvP Servers).',
+    zero_lava_badge: '🛡️ Zero Lava Rule',
+    zero_lava_desc: 'Flames and breath plumes use layered stained glass panes and cobwebs; zero server lag or accidental burning.',
     cad_controls_title: 'CAD Constraint Controls',
     max_volume_span: 'Max Volume Span',
     mirror_symmetry: 'Mirror Symmetry',

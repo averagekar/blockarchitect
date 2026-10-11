@@ -17,7 +17,7 @@ export function modernToLegacy18(blockName, props = {}) {
   }
 
   // 2. Beton (Concrete) ve Terracotta (Hardened Clay) -> 1.8.9'da Stained Clay (ID 159) veya Wool (ID 35)
-  const concreteMatch = name.match(/^(white|orange|magenta|light_blue|yellow|lime|pink|gray|light_gray|cyan|purple|blue|brown|green|red|black)_(concrete|terracotta)$/);
+  const concreteMatch = name.match(/^(white|orange|magenta|light_blue|yellow|lime|pink|gray|light_gray|cyan|purple|blue|brown|green|red|black)_(concrete|terracotta|stained_hardened_clay|stained_clay)$/);
   if (concreteMatch) {
     const colors = ['white', 'orange', 'magenta', 'light_blue', 'yellow', 'lime', 'pink', 'gray', 'light_gray', 'cyan', 'purple', 'blue', 'brown', 'green', 'red', 'black'];
     return { id: 159, data: Math.max(0, colors.indexOf(concreteMatch[1])) };
@@ -161,7 +161,12 @@ export function modernToLegacy18(blockName, props = {}) {
     cobblestone: { id: 4, data: 0 },
     bedrock: { id: 7, data: 0 },
     water: { id: 9, data: 0 },
-    lava: { id: 11, data: 0 },
+    // Guvenlik & Sunucu Koruma: Alevlerde akan lav sunucuyu yakmasin ve lag yapmasin diye renkli cam pane'e cevrilir
+    lava: { id: 160, data: 14 }, // Red stained glass pane (flicker fire)
+    flowing_lava: { id: 160, data: 1 }, // Orange stained glass pane
+    web: { id: 30, data: 0 }, // Cobweb / Orumcek Agi
+    cobweb: { id: 30, data: 0 },
+    barrier: { id: 166, data: 0 },
     sand: { id: 12, data: 0 },
     red_sand: { id: 12, data: 1 },
     gravel: { id: 13, data: 0 },

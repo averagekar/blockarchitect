@@ -7,11 +7,11 @@ async function readError(res) {
   }
 }
 
-export async function generateStructure(prompt, provider = 'auto') {
+export async function generateStructure(prompt, provider = 'auto', version = '1.21') {
   const res = await fetch('/api/generate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt, provider }),
+    body: JSON.stringify({ prompt, provider, version }),
   });
   if (!res.ok) throw new Error(await readError(res));
   return res.json();

@@ -35,16 +35,17 @@ const generateLimiter = rateLimit({
 const PromptBody = z.object({
   prompt: z.string().trim().min(3).max(4000),
   provider: z.enum(['auto', 'deepseek', 'gemini']).optional().default('auto'),
+  version: z.enum(['1.8.9', '1.21']).optional().default('1.21'),
 });
 
-// POST /api/generate  { prompt, provider? }  ->  yapi JSON'u
+// POST /api/generate  { prompt, provider?, version? }  ->  yapi JSON'u
 app.post('/api/generate', generateLimiter, async (req, res) => {
   const parsed = PromptBody.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: 'Prompt 3-4000 karakter olmali.' });
   }
   try {
-    const structure = await generateStructure(parsed.data.prompt, parsed.data.provider);
+    const structure = await generateStructure(parsed.data.prompt, parsed.data.provider, parsed.data.version);
     res.json(structure);
   } catch (err) {
     console.error('[generate]', err);

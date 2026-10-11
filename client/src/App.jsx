@@ -95,6 +95,7 @@ export default function App() {
   const [rightTab, setRightTab] = useState('palette'); // 'palette' | 'survival' | 'deployment'
 
   const [prompt, setPrompt] = useState('');
+  const [mcVersion, setMcVersion] = useState('1.21'); // '1.21' | '1.8.9'
   const [maxSpan, setMaxSpan] = useState(180);
   const [symmetry, setSymmetry] = useState('x'); // 'none' | 'x' | 'z'
   const [dithering, setDithering] = useState(true);
@@ -190,7 +191,7 @@ export default function App() {
       if (symmetry === 'z') fullPrompt += ` (Front-Back Z-axis mirror symmetry)`;
       if (dithering) fullPrompt += ` (WorldEdit % gradient dithering enabled)`;
 
-      const res = await generateStructure(fullPrompt, provider);
+      const res = await generateStructure(fullPrompt, provider, mcVersion);
       setStructure(res);
       setRightOpen(true);
       toast.success(t('toast_compile_success'), {
@@ -251,7 +252,8 @@ export default function App() {
     setError('');
     setPaletteOverrides({});
     try {
-      const res = await fetchPreset(presetId);
+      const targetPreset = mcVersion === '1.8.9' ? `${presetId}_18` : presetId;
+      const res = await fetchPreset(targetPreset).catch(() => fetchPreset(presetId));
       setStructure(res);
       setRightOpen(true);
       toast.success(t('toast_compile_success'), {
@@ -612,7 +614,11 @@ export default function App() {
                 onClick={handleDownload}
                 disabled={downloading}
                 title="WorldEdit 7+ (Minecraft 1.13 - 1.21+ Sponge v2)"
-                className="cursor-pointer flex h-7 items-center gap-1.5 rounded-lg bg-amber-cad/15 px-2.5 text-[11px] text-amber-cad border border-amber-cad/30 hover:bg-amber-cad/25 transition-colors disabled:opacity-40 shadow-sm font-medium"
+                className={`cursor-pointer flex h-7 items-center gap-1.5 rounded-lg px-2.5 text-[11px] transition-all disabled:opacity-40 shadow-sm font-medium ${
+                  mcVersion === '1.21'
+                    ? 'bg-amber-cad/25 text-amber-cad border border-amber-cad/50 shadow-amber-cad/10'
+                    : 'bg-surface text-ink-muted border border-line hover:text-ink hover:bg-surface-hover'
+                }`}
               >
                 <Download className="h-3 w-3" />
                 <span>{downloading ? t('compiling') : t('download_schem')}</span>
@@ -625,7 +631,11 @@ export default function App() {
                 onClick={handleDownloadLegacy}
                 disabled={downloadingLegacy}
                 title="WorldEdit 6 / MCEdit (Minecraft 1.8.9 PvP Sunucuları)"
-                className="cursor-pointer flex h-7 items-center gap-1.5 rounded-lg bg-emerald-500/15 px-2.5 text-[11px] text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25 transition-colors disabled:opacity-40 shadow-sm font-medium"
+                className={`cursor-pointer flex h-7 items-center gap-1.5 rounded-lg px-2.5 text-[11px] transition-all disabled:opacity-40 shadow-sm font-medium ${
+                  mcVersion === '1.8.9'
+                    ? 'bg-emerald-500/25 text-emerald-400 border border-emerald-500/60 shadow-emerald-500/10'
+                    : 'bg-surface text-ink-muted border border-line hover:text-ink hover:bg-surface-hover'
+                }`}
               >
                 <Download className="h-3 w-3" />
                 <span>{downloadingLegacy ? t('compiling') : t('download_schematic_legacy')}</span>
@@ -765,6 +775,62 @@ export default function App() {
                             );
                           })}
                         </div>
+                      </div>
+
+                      {/* Sürüm Seçimi ve Sıfır Lav Kuralı */}
+                      <div className="space-y-2 rounded-xl border border-line bg-surface/70 p-3 font-mono text-xs shadow-sm">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-ink-dim uppercase font-semibold flex items-center gap-1.5">
+                            <Box className="h-3 w-3 text-amber-cad" />
+                            {t('target_mc_version')}
+                          </span>
+                          <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[9px] text-emerald-400 border border-emerald-500/20 font-bold flex items-center gap-1">
+                            {t('zero_lava_badge')}
+                          </span>
+                        </div>
+
+                        {/* Versiyon Seçici Grid */}
+                        <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+                          <button
+                            type="button"
+                            onClick={() => setMcVersion('1.21')}
+                            className={`cursor-pointer rounded-lg py-2 px-2 text-center font-bold text-xs border transition-all ${
+                              mcVersion === '1.21'
+                                ? 'bg-amber-cad/15 text-amber-cad border-amber-cad/50 shadow-sm ring-1 ring-amber-cad/20'
+                                : 'bg-surface text-ink-dim border-line hover:text-ink hover:bg-surface-hover'
+                            }`}
+                          >
+                            <div className="flex items-center justify-center gap-1.5">
+                              <span>🔮</span>
+                              <span>{t('version_1_21')}</span>
+                            </div>
+                            <div className="text-[9px] font-normal opacity-70 mt-0.5 truncate">
+                              Deepslate, Concrete, 1.21
+                            </div>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setMcVersion('1.8.9')}
+                            className={`cursor-pointer rounded-lg py-2 px-2 text-center font-bold text-xs border transition-all ${
+                              mcVersion === '1.8.9'
+                                ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/50 shadow-sm ring-1 ring-emerald-500/20'
+                                : 'bg-surface text-ink-dim border-line hover:text-ink hover:bg-surface-hover'
+                            }`}
+                          >
+                            <div className="flex items-center justify-center gap-1.5">
+                              <span>⚔️</span>
+                              <span>{t('version_1_8')}</span>
+                            </div>
+                            <div className="text-[9px] font-normal opacity-70 mt-0.5 truncate">
+                              Stained Clay, Panes, Web
+                            </div>
+                          </button>
+                        </div>
+
+                        <p className="text-[10px] text-ink-dim leading-relaxed pt-0.5">
+                          {mcVersion === '1.8.9' ? t('version_1_8_desc') : t('version_1_21_desc')}
+                        </p>
                       </div>
 
                       {/* CAD Parametre Kılavuzları */}
@@ -1436,7 +1502,11 @@ export default function App() {
                             type="button"
                             onClick={handleDownload}
                             disabled={downloading}
-                            className="cursor-pointer flex items-center justify-center gap-1.5 rounded-xl bg-amber-cad py-2.5 font-bold text-base hover:bg-amber-400 transition-colors disabled:opacity-40 shadow-lg shadow-amber-cad/10"
+                            className={`cursor-pointer flex items-center justify-center gap-1.5 rounded-xl py-2.5 font-bold transition-all disabled:opacity-40 shadow-sm ${
+                              mcVersion === '1.21'
+                                ? 'bg-amber-cad text-base hover:bg-amber-400 shadow-lg shadow-amber-cad/15'
+                                : 'border border-amber-cad/40 bg-amber-cad/10 text-amber-cad hover:bg-amber-cad/20'
+                            }`}
                           >
                             <Download className="h-3.5 w-3.5" />
                             <span>1.21+ .schem</span>
@@ -1448,7 +1518,11 @@ export default function App() {
                             type="button"
                             onClick={handleDownloadLegacy}
                             disabled={downloadingLegacy}
-                            className="cursor-pointer flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/15 py-2.5 font-bold text-emerald-400 hover:bg-emerald-500/25 transition-colors disabled:opacity-40 shadow-sm"
+                            className={`cursor-pointer flex items-center justify-center gap-1.5 rounded-xl py-2.5 font-bold transition-all disabled:opacity-40 shadow-sm ${
+                              mcVersion === '1.8.9'
+                                ? 'bg-emerald-500 text-base hover:bg-emerald-400 shadow-lg shadow-emerald-500/20'
+                                : 'border border-emerald-500/40 bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25'
+                            }`}
                           >
                             <Download className="h-3.5 w-3.5" />
                             <span>1.8.9 .schematic</span>
